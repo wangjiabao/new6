@@ -174,6 +174,8 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 				level3Csd, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			} else if "level_4_csd" == vConfig.KeyName {
 				level4Csd, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "recommend_rate" == vConfig.KeyName {
+				recommendRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			}
 		}
 	}

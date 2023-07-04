@@ -113,7 +113,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 
 				// 最少百位以上
 				lenValue := len(vDepositUsdtResult.Value)
-				if 20 > lenValue { // 0.1
+				if 18 > lenValue { // 0.1
 					continue
 				}
 				// 去掉8个尾数0作为系统金额
@@ -123,7 +123,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 				}
 
 				//fmt.Println(vDepositUsdtResult.Value, tmpValue)
-				if int64(1000000000000) > tmpValue { // 1000000000000
+				if int64(10000000000) > tmpValue { // 1000000000000
 					continue
 				}
 

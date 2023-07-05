@@ -67,6 +67,7 @@ type AppClient interface {
 	AdminDailyRecommendReward(ctx context.Context, in *AdminDailyRecommendRewardRequest, opts ...grpc.CallOption) (*AdminDailyRecommendRewardReply, error)
 	AdminDailyBalanceReward(ctx context.Context, in *AdminDailyBalanceRewardRequest, opts ...grpc.CallOption) (*AdminDailyBalanceRewardReply, error)
 	AdminDailyLocationReward(ctx context.Context, in *AdminDailyLocationRewardRequest, opts ...grpc.CallOption) (*AdminDailyLocationRewardReply, error)
+	AdminDailyLocationRewardNew(ctx context.Context, in *AdminDailyLocationRewardNewRequest, opts ...grpc.CallOption) (*AdminDailyLocationRewardNewReply, error)
 }
 
 type appClient struct {
@@ -482,6 +483,15 @@ func (c *appClient) AdminDailyLocationReward(ctx context.Context, in *AdminDaily
 	return out, nil
 }
 
+func (c *appClient) AdminDailyLocationRewardNew(ctx context.Context, in *AdminDailyLocationRewardNewRequest, opts ...grpc.CallOption) (*AdminDailyLocationRewardNewReply, error) {
+	out := new(AdminDailyLocationRewardNewReply)
+	err := c.cc.Invoke(ctx, "/api.App/AdminDailyLocationRewardNew", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AppServer is the server API for App service.
 // All implementations must embed UnimplementedAppServer
 // for forward compatibility
@@ -531,6 +541,7 @@ type AppServer interface {
 	AdminDailyRecommendReward(context.Context, *AdminDailyRecommendRewardRequest) (*AdminDailyRecommendRewardReply, error)
 	AdminDailyBalanceReward(context.Context, *AdminDailyBalanceRewardRequest) (*AdminDailyBalanceRewardReply, error)
 	AdminDailyLocationReward(context.Context, *AdminDailyLocationRewardRequest) (*AdminDailyLocationRewardReply, error)
+	AdminDailyLocationRewardNew(context.Context, *AdminDailyLocationRewardNewRequest) (*AdminDailyLocationRewardNewReply, error)
 	mustEmbedUnimplementedAppServer()
 }
 
@@ -672,6 +683,9 @@ func (UnimplementedAppServer) AdminDailyBalanceReward(context.Context, *AdminDai
 }
 func (UnimplementedAppServer) AdminDailyLocationReward(context.Context, *AdminDailyLocationRewardRequest) (*AdminDailyLocationRewardReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminDailyLocationReward not implemented")
+}
+func (UnimplementedAppServer) AdminDailyLocationRewardNew(context.Context, *AdminDailyLocationRewardNewRequest) (*AdminDailyLocationRewardNewReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminDailyLocationRewardNew not implemented")
 }
 func (UnimplementedAppServer) mustEmbedUnimplementedAppServer() {}
 
@@ -1496,6 +1510,24 @@ func _App_AdminDailyLocationReward_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _App_AdminDailyLocationRewardNew_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminDailyLocationRewardNewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminDailyLocationRewardNew(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/AdminDailyLocationRewardNew",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminDailyLocationRewardNew(ctx, req.(*AdminDailyLocationRewardNewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // App_ServiceDesc is the grpc.ServiceDesc for App service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -1682,6 +1714,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminDailyLocationReward",
 			Handler:    _App_AdminDailyLocationReward_Handler,
+		},
+		{
+			MethodName: "AdminDailyLocationRewardNew",
+			Handler:    _App_AdminDailyLocationRewardNew_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

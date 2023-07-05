@@ -111,11 +111,11 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 					continue
 				}
 
-				// 最少百位以上
 				lenValue := len(vDepositUsdtResult.Value)
-				if 18 > lenValue { // 0.1
+				if 18 > lenValue {
 					continue
 				}
+
 				// 去掉8个尾数0作为系统金额
 				tmpValue, _ := strconv.ParseInt(vDepositUsdtResult.Value[0:lenValue-8], 10, 64)
 				if 0 == tmpValue {
@@ -629,6 +629,10 @@ func (a *AppService) CheckAndInsertRecommendArea(ctx context.Context, req *v1.Ch
 
 func (a *AppService) AdminDailyLocationReward(ctx context.Context, req *v1.AdminDailyLocationRewardRequest) (*v1.AdminDailyLocationRewardReply, error) {
 	return a.uuc.AdminDailyLocationReward(ctx, req)
+}
+
+func (a *AppService) AdminDailyLocationRewardNew(ctx context.Context, req *v1.AdminDailyLocationRewardNewRequest) (*v1.AdminDailyLocationRewardNewReply, error) {
+	return a.uuc.AdminDailyLocationRewardNew(ctx, req)
 }
 
 func (a *AppService) AdminDailyRecommendReward(ctx context.Context, req *v1.AdminDailyRecommendRewardRequest) (*v1.AdminDailyRecommendRewardReply, error) {

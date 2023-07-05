@@ -93,12 +93,14 @@ type LocationRepo interface {
 	GetLocationUserCount(ctx context.Context) int64
 	GetLocationByIds(ctx context.Context, userIds ...int64) ([]*LocationNew, error)
 	GetAllLocations(ctx context.Context) ([]*Location, error)
+	GetAllLocationsNew(ctx context.Context) ([]*LocationNew, error)
 	GetLocationsByUserIds(ctx context.Context, userIds []int64) ([]*Location, error)
 
 	CreateLocationNew(ctx context.Context, rel *LocationNew) (*LocationNew, error)
 	GetMyStopLocationsLast(ctx context.Context, userId int64) ([]*LocationNew, error)
 	GetLocationsNewByUserId(ctx context.Context, userId int64) ([]*LocationNew, error)
 	UpdateLocationNew(ctx context.Context, id int64, status string, current int64, stopDate time.Time) error
+	UpdateLocationNewCurrent(ctx context.Context, id int64, current int64) error
 	GetRunningLocations(ctx context.Context) ([]*LocationNew, error)
 }
 
@@ -142,17 +144,14 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 		level2Price   int64
 		level3Price   int64
 		level4Price   int64
-		level1Csd     int64
-		level2Csd     int64
-		level3Csd     int64
-		level4Csd     int64
+		csdPrice      int64
+		vip1          bool
 		recommendRate int64
-		outRate       int64
 	)
 	// 配置
 	configs, _ = ruc.configRepo.GetConfigByKeys(ctx,
 		"term", "level_1_price", "level_2_price", "level_3_price", "level_4_price",
-		"level_1_csd", "level_2_csd", "level_3_csd", "level_4_csd", "recommend_rate",
+		"csd_price", "recommend_rate",
 	)
 	if nil != configs {
 		for _, vConfig := range configs {
@@ -166,14 +165,8 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 				level3Price, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			} else if "level_4_price" == vConfig.KeyName {
 				level4Price, _ = strconv.ParseInt(vConfig.Value, 10, 64)
-			} else if "level_1_csd" == vConfig.KeyName {
-				level1Csd, _ = strconv.ParseInt(vConfig.Value, 10, 64)
-			} else if "level_2_csd" == vConfig.KeyName {
-				level2Csd, _ = strconv.ParseInt(vConfig.Value, 10, 64)
-			} else if "level_3_csd" == vConfig.KeyName {
-				level3Csd, _ = strconv.ParseInt(vConfig.Value, 10, 64)
-			} else if "level_4_csd" == vConfig.KeyName {
-				level4Csd, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "csd_price" == vConfig.KeyName {
+				csdPrice, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			} else if "recommend_rate" == vConfig.KeyName {
 				recommendRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			}
@@ -194,6 +187,7 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 			myUserRecommendUserInfo *UserInfo
 			myLocations             []*LocationNew
 			tmpRecommendUserIds     []string
+			myUserInfo              *UserInfo
 			err                     error
 		)
 
@@ -217,13 +211,14 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 		}
 
 		if v.RelAmount >= level1Price*10000000000 && v.RelAmount < level2Price*10000000000 {
-			locationCurrentMax = level1Csd * 10000000000
+			locationCurrentMax = level1Price * 10000000000 * csdPrice / 1000
 		} else if v.RelAmount >= level2Price*10000000000 && v.RelAmount < level3Price*10000000000 {
-			locationCurrentMax = level2Csd * 10000000000
+			locationCurrentMax = level2Price * 10000000000 * csdPrice / 1000
 		} else if v.RelAmount >= level3Price*10000000000 && v.RelAmount < level4Price*10000000000 {
-			locationCurrentMax = level3Csd * 10000000000
+			locationCurrentMax = level3Price * 10000000000 * csdPrice / 1000
 		} else if v.RelAmount >= level4Price*10000000000 {
-			locationCurrentMax = level4Csd * 10000000000
+			locationCurrentMax = level4Price * 10000000000 * csdPrice / 1000
+			vip1 = true
 		}
 
 		// 推荐人
@@ -251,6 +246,10 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 		//		}
 		//	}
 		//}
+		myUserInfo, err = ruc.userInfoRepo.GetUserInfoByUserId(ctx, v.UserId)
+		if nil != err {
+			continue
+		}
 
 		if err = ruc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 			tmpLocationStatus := "running"
@@ -265,11 +264,17 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 				Status:     tmpLocationStatus,
 				Current:    locationCurrent,
 				CurrentMax: locationCurrentMax,
-				OutRate:    outRate,
 				StopDate:   tmpStopDate,
 			})
 			if nil != err {
 				return err
+			}
+
+			if vip1 && 0 == myUserInfo.Vip {
+				_, err = ruc.userInfoRepo.UpdateUserInfoVip(ctx, v.UserId, 1) // 推荐人信息修改
+				if nil != err {
+					return err
+				}
 			}
 
 			// 推荐人

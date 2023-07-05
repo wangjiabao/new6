@@ -217,6 +217,7 @@ type UserBalanceRepo interface {
 	DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastUsdtAmount int64, lastCoinAmount int64) (int64, error)
 	UpdateBalanceRewardLastRewardDate(ctx context.Context, id int64) error
 	UpdateLocationAgain(ctx context.Context, locations []*LocationNew) error
+	LocationNewDailyReward(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
 }
 
 type UserRecommendRepo interface {
@@ -248,6 +249,7 @@ type UserInfoRepo interface {
 	CreateUserInfo(ctx context.Context, u *User) (*UserInfo, error)
 	GetUserInfoByUserId(ctx context.Context, userId int64) (*UserInfo, error)
 	UpdateUserInfo(ctx context.Context, u *UserInfo) (*UserInfo, error)
+	UpdateUserInfoVip(ctx context.Context, userId, vip int64) (*UserInfo, error)
 	GetUserInfoByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserInfo, error)
 }
 
@@ -1929,6 +1931,60 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 	}
 
 	return &v1.AdminDailyLocationRewardReply{}, nil
+}
+
+func (uuc *UserUseCase) AdminDailyLocationRewardNew(ctx context.Context, req *v1.AdminDailyLocationRewardNewRequest) (*v1.AdminDailyLocationRewardNewReply, error) {
+	var (
+		userLocations     []*LocationNew
+		configs           []*Config
+		locationDailyRate int64
+		err               error
+	)
+	configs, _ = uuc.configRepo.GetConfigByKeys(ctx,
+		"locations_daily_rate",
+	)
+
+	if nil != configs {
+		for _, vConfig := range configs {
+			if "locations_daily" == vConfig.KeyName {
+				locationDailyRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			}
+		}
+	}
+
+	userLocations, err = uuc.locationRepo.GetAllLocationsNew(ctx)
+	if nil != err {
+		return &v1.AdminDailyLocationRewardNewReply{}, nil
+	}
+
+	for _, vUserLocations := range userLocations {
+		if vUserLocations.CurrentMax <= vUserLocations.Current {
+			continue
+		}
+
+		tmp := vUserLocations.CurrentMax * locationDailyRate / 1000
+		if tmp+vUserLocations.Current > vUserLocations.CurrentMax {
+			tmp = vUserLocations.CurrentMax - vUserLocations.Current
+		}
+
+		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+			err = uuc.locationRepo.UpdateLocationNewCurrent(ctx, vUserLocations.ID, tmp)
+			if nil != err {
+				return err
+			}
+
+			_, err = uuc.ubRepo.LocationNewDailyReward(ctx, vUserLocations.UserId, tmp, vUserLocations.ID)
+			if nil != err {
+				return err
+			}
+
+			return nil
+		}); nil != err {
+			continue
+		}
+	}
+
+	return &v1.AdminDailyLocationRewardNewReply{}, nil
 }
 
 func (uuc *UserUseCase) AdminDailyRecommendReward(ctx context.Context, req *v1.AdminDailyRecommendRewardRequest) (*v1.AdminDailyRecommendRewardReply, error) {

@@ -300,6 +300,12 @@ service App {
 			get: "/api/admin_dhb/daily_location_reward"
 		};
 	};
+
+	rpc AdminDailyLocationRewardNew (AdminDailyLocationRewardNewRequest) returns (AdminDailyLocationRewardNewReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/daily_location_reward_new"
+		};
+	};
 }
 
 message EthAuthorizeRequest {
@@ -884,4 +890,10 @@ message AdminDailyLocationRewardRequest {
 }
 
 message AdminDailyLocationRewardReply {
+}
+
+message AdminDailyLocationRewardNewRequest {
+}
+
+message AdminDailyLocationRewardNewReply {
 }

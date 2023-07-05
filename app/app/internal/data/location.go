@@ -330,6 +330,32 @@ func (lr *LocationRepo) GetAllLocations(ctx context.Context) ([]*biz.Location, e
 	return res, nil
 }
 
+// GetAllLocationsNew .
+func (lr *LocationRepo) GetAllLocationsNew(ctx context.Context) ([]*biz.LocationNew, error) {
+	var locations []*LocationNew
+	res := make([]*biz.LocationNew, 0)
+	if err := lr.data.db.Table("location_new").
+		Order("id desc").Find(&locations).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("LOCATION_NOT_FOUND", "location not found")
+		}
+
+		return nil, errors.New(500, "LOCATION ERROR", err.Error())
+	}
+
+	for _, location := range locations {
+		res = append(res, &biz.LocationNew{
+			ID:         location.ID,
+			UserId:     location.UserId,
+			Term:       location.Term,
+			Current:    location.Current,
+			CurrentMax: location.CurrentMax,
+		})
+	}
+
+	return res, nil
+}
+
 // GetLocationsByUserId .
 func (lr *LocationRepo) GetLocationsByUserId(ctx context.Context, userId int64) ([]*biz.Location, error) {
 	var locations []*Location
@@ -529,6 +555,19 @@ func (lr *LocationRepo) UpdateLocationNew(ctx context.Context, id int64, status 
 		if 0 == res.RowsAffected || res.Error != nil {
 			return res.Error
 		}
+	}
+
+	return nil
+}
+
+// UpdateLocationNewCurrent .
+func (lr *LocationRepo) UpdateLocationNewCurrent(ctx context.Context, id int64, current int64) error {
+
+	res := lr.data.DB(ctx).Table("location_new").
+		Where("id=?", id).
+		Updates(map[string]interface{}{"current": gorm.Expr("current + ?", current)})
+	if 0 == res.RowsAffected || res.Error != nil {
+		return res.Error
 	}
 
 	return nil

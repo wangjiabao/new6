@@ -10346,6 +10346,216 @@ var _ interface {
 	ErrorName() string
 } = AdminDailyLocationRewardReplyValidationError{}
 
+// Validate checks the field values on AdminDailyLocationRewardNewRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *AdminDailyLocationRewardNewRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AdminDailyLocationRewardNewRequest
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// AdminDailyLocationRewardNewRequestMultiError, or nil if none found.
+func (m *AdminDailyLocationRewardNewRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminDailyLocationRewardNewRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return AdminDailyLocationRewardNewRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminDailyLocationRewardNewRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// AdminDailyLocationRewardNewRequest.ValidateAll() if the designated
+// constraints aren't met.
+type AdminDailyLocationRewardNewRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminDailyLocationRewardNewRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminDailyLocationRewardNewRequestMultiError) AllErrors() []error { return m }
+
+// AdminDailyLocationRewardNewRequestValidationError is the validation error
+// returned by AdminDailyLocationRewardNewRequest.Validate if the designated
+// constraints aren't met.
+type AdminDailyLocationRewardNewRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminDailyLocationRewardNewRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminDailyLocationRewardNewRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminDailyLocationRewardNewRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminDailyLocationRewardNewRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminDailyLocationRewardNewRequestValidationError) ErrorName() string {
+	return "AdminDailyLocationRewardNewRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AdminDailyLocationRewardNewRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminDailyLocationRewardNewRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminDailyLocationRewardNewRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminDailyLocationRewardNewRequestValidationError{}
+
+// Validate checks the field values on AdminDailyLocationRewardNewReply with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *AdminDailyLocationRewardNewReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AdminDailyLocationRewardNewReply with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// AdminDailyLocationRewardNewReplyMultiError, or nil if none found.
+func (m *AdminDailyLocationRewardNewReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminDailyLocationRewardNewReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return AdminDailyLocationRewardNewReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminDailyLocationRewardNewReplyMultiError is an error wrapping multiple
+// validation errors returned by
+// AdminDailyLocationRewardNewReply.ValidateAll() if the designated
+// constraints aren't met.
+type AdminDailyLocationRewardNewReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminDailyLocationRewardNewReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminDailyLocationRewardNewReplyMultiError) AllErrors() []error { return m }
+
+// AdminDailyLocationRewardNewReplyValidationError is the validation error
+// returned by AdminDailyLocationRewardNewReply.Validate if the designated
+// constraints aren't met.
+type AdminDailyLocationRewardNewReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminDailyLocationRewardNewReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminDailyLocationRewardNewReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminDailyLocationRewardNewReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminDailyLocationRewardNewReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminDailyLocationRewardNewReplyValidationError) ErrorName() string {
+	return "AdminDailyLocationRewardNewReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AdminDailyLocationRewardNewReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminDailyLocationRewardNewReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminDailyLocationRewardNewReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminDailyLocationRewardNewReplyValidationError{}
+
 // Validate checks the field values on EthAuthorizeRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

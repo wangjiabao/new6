@@ -148,6 +148,107 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 	return &v1.DepositReply{}, nil
 }
 
+// Deposit3 deposit.
+func (a *AppService) Deposit3(ctx context.Context, req *v1.DepositRequest) (*v1.DepositReply, error) {
+
+	var (
+		depositUsdtResult     map[string]*eth
+		notExistDepositResult []*biz.EthUserRecord
+		existEthUserRecords   map[string]*biz.EthUserRecord
+		depositUsers          map[string]*biz.User
+		fromAccount           []string
+		hashKeys              []string
+		err                   error
+	)
+
+	end := time.Now().UTC().Add(20 * time.Second)
+
+	// 配置
+	//configs, err = a.uuc.GetDhbConfig(ctx)
+	//if nil != configs {
+	//	for _, vConfig := range configs {
+	//		if "level1Dhb" == vConfig.KeyName {
+	//			level1Dhb = vConfig.Value + "0000000000000000"
+	//		} else if "level2Dhb" == vConfig.KeyName {
+	//			level2Dhb = vConfig.Value + "0000000000000000"
+	//		} else if "level3Dhb" == vConfig.KeyName {
+	//			level3Dhb = vConfig.Value + "0000000000000000"
+	//		}
+	//	}
+	//}
+
+	for i := 1; i <= 5; i++ {
+		// 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd
+		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x0905397af05dd0bdf76690ff318b10c6216e3069")
+		if nil != err {
+			break
+		}
+
+		now := time.Now().UTC()
+		fmt.Println(now, end)
+		if end.Before(now) {
+			break
+		}
+
+		if 0 >= len(depositUsdtResult) {
+			break
+		}
+
+		for hashKey, vDepositResult := range depositUsdtResult { // 主查询
+			hashKeys = append(hashKeys, hashKey)
+			fromAccount = append(fromAccount, vDepositResult.From)
+		}
+
+		depositUsers, err = a.uuc.GetUserByAddress(ctx, fromAccount...)
+		if nil != depositUsers {
+			existEthUserRecords, err = a.ruc.GetEthUserRecordByTxHash(ctx, hashKeys...)
+			// 统计开始
+			notExistDepositResult = make([]*biz.EthUserRecord, 0)
+			for _, vDepositUsdtResult := range depositUsdtResult { // 主查usdt
+				if _, ok := existEthUserRecords[vDepositUsdtResult.Hash]; ok { // 记录已存在
+					continue
+				}
+				if _, ok := depositUsers[vDepositUsdtResult.From]; !ok { // 用户不存在
+					continue
+				}
+
+				lenValue := len(vDepositUsdtResult.Value)
+				if 18 > lenValue {
+					continue
+				}
+
+				// 去掉8个尾数0作为系统金额
+				tmpValue, _ := strconv.ParseInt(vDepositUsdtResult.Value[0:lenValue-8], 10, 64)
+				if 0 == tmpValue {
+					continue
+				}
+
+				//fmt.Println(vDepositUsdtResult.Value, tmpValue)
+				if int64(10000000000) > tmpValue { // 1000000000000
+					continue
+				}
+
+				notExistDepositResult = append(notExistDepositResult, &biz.EthUserRecord{ // 两种币的记录
+					UserId:    depositUsers[vDepositUsdtResult.From].ID,
+					Hash:      vDepositUsdtResult.Hash,
+					Status:    "success",
+					Type:      "deposit",
+					Amount:    strconv.FormatInt(tmpValue, 10) + "00000000",
+					RelAmount: tmpValue,
+					CoinType:  "HBS",
+				})
+			}
+
+			_, err = a.ruc.EthUserRecordHandle2(ctx, notExistDepositResult...)
+			if nil != err {
+				fmt.Println(err)
+			}
+		}
+	}
+
+	return &v1.DepositReply{}, nil
+}
+
 // Deposit2 deposit2.
 func (a *AppService) Deposit2(ctx context.Context, req *v1.DepositRequest) (*v1.DepositReply, error) {
 	time.Sleep(30 * time.Second)
@@ -520,7 +621,12 @@ func (a *AppService) AdminWithdrawList(ctx context.Context, req *v1.AdminWithdra
 }
 
 func (a *AppService) AdminWithdraw(ctx context.Context, req *v1.AdminWithdrawRequest) (*v1.AdminWithdrawReply, error) {
-	return a.uuc.AdminWithdraw(ctx, req)
+	//return a.uuc.AdminWithdraw(ctx, req)
+	return nil, nil
+}
+
+func (a *AppService) AdminTrade(ctx context.Context, req *v1.AdminTradeRequest) (*v1.AdminTradeReply, error) {
+	return a.uuc.AdminTrade(ctx, req)
 }
 
 func (a *AppService) AdminWithdrawPass(ctx context.Context, req *v1.AdminWithdrawPassRequest) (*v1.AdminWithdrawPassReply, error) {
@@ -654,15 +760,10 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		userIdsMap   map[int64]int64
 		users        map[int64]*biz.User
 		tokenAddress string
-		globalLock   *biz.GlobalLock
 		err          error
 	)
 
 	for {
-		globalLock, err = a.ruc.GetGlobalLock(ctx)
-		if 1 != globalLock.Status {
-			break
-		}
 
 		withdraw, err = a.uuc.GetWithdrawPassOrRewardedFirst(ctx)
 		if nil == withdraw {
@@ -687,11 +788,13 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 			continue
 		}
 
-		if "dhb" == withdraw.Type {
-			tokenAddress = "0x6504631df9F6FF397b0ec442FB80685a7B1688d4"
-		} else if "usdt" == withdraw.Type {
+		//if "dhb" == withdraw.Type {
+		//	tokenAddress = "0x6504631df9F6FF397b0ec442FB80685a7B1688d4"
+		//} else
+
+		if "usdt" == withdraw.Type {
 			//tokenAddress = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd"
-			tokenAddress = "0x55d398326f99059fF775485246999027B3197955"
+			tokenAddress = "0x0BAEfDB75cA6CA9A0d1685086829F3Ea9dDA9f5E"
 		} else {
 			continue
 		}

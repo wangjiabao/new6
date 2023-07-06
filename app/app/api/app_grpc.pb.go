@@ -30,6 +30,7 @@ type AppClient interface {
 	RecommendList(ctx context.Context, in *RecommendListRequest, opts ...grpc.CallOption) (*RecommendListReply, error)
 	Withdraw(ctx context.Context, in *WithdrawRequest, opts ...grpc.CallOption) (*WithdrawReply, error)
 	Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
+	Deposit3(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
 	Deposit2(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
 	AdminRewardList(ctx context.Context, in *AdminRewardListRequest, opts ...grpc.CallOption) (*AdminRewardListReply, error)
 	LockSystem(ctx context.Context, in *LockSystemRequest, opts ...grpc.CallOption) (*LockSystemReply, error)
@@ -40,6 +41,7 @@ type AppClient interface {
 	AdminLocationAllList(ctx context.Context, in *AdminLocationAllListRequest, opts ...grpc.CallOption) (*AdminLocationAllListReply, error)
 	AdminWithdrawList(ctx context.Context, in *AdminWithdrawListRequest, opts ...grpc.CallOption) (*AdminWithdrawListReply, error)
 	AdminWithdraw(ctx context.Context, in *AdminWithdrawRequest, opts ...grpc.CallOption) (*AdminWithdrawReply, error)
+	AdminTrade(ctx context.Context, in *AdminTradeRequest, opts ...grpc.CallOption) (*AdminTradeReply, error)
 	AdminWithdrawPass(ctx context.Context, in *AdminWithdrawPassRequest, opts ...grpc.CallOption) (*AdminWithdrawPassReply, error)
 	AdminWithdrawEth(ctx context.Context, in *AdminWithdrawEthRequest, opts ...grpc.CallOption) (*AdminWithdrawEthReply, error)
 	AdminFee(ctx context.Context, in *AdminFeeRequest, opts ...grpc.CallOption) (*AdminFeeReply, error)
@@ -150,6 +152,15 @@ func (c *appClient) Deposit(ctx context.Context, in *DepositRequest, opts ...grp
 	return out, nil
 }
 
+func (c *appClient) Deposit3(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error) {
+	out := new(DepositReply)
+	err := c.cc.Invoke(ctx, "/api.App/Deposit3", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *appClient) Deposit2(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error) {
 	out := new(DepositReply)
 	err := c.cc.Invoke(ctx, "/api.App/Deposit2", in, out, opts...)
@@ -234,6 +245,15 @@ func (c *appClient) AdminWithdrawList(ctx context.Context, in *AdminWithdrawList
 func (c *appClient) AdminWithdraw(ctx context.Context, in *AdminWithdrawRequest, opts ...grpc.CallOption) (*AdminWithdrawReply, error) {
 	out := new(AdminWithdrawReply)
 	err := c.cc.Invoke(ctx, "/api.App/AdminWithdraw", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appClient) AdminTrade(ctx context.Context, in *AdminTradeRequest, opts ...grpc.CallOption) (*AdminTradeReply, error) {
+	out := new(AdminTradeReply)
+	err := c.cc.Invoke(ctx, "/api.App/AdminTrade", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -504,6 +524,7 @@ type AppServer interface {
 	RecommendList(context.Context, *RecommendListRequest) (*RecommendListReply, error)
 	Withdraw(context.Context, *WithdrawRequest) (*WithdrawReply, error)
 	Deposit(context.Context, *DepositRequest) (*DepositReply, error)
+	Deposit3(context.Context, *DepositRequest) (*DepositReply, error)
 	Deposit2(context.Context, *DepositRequest) (*DepositReply, error)
 	AdminRewardList(context.Context, *AdminRewardListRequest) (*AdminRewardListReply, error)
 	LockSystem(context.Context, *LockSystemRequest) (*LockSystemReply, error)
@@ -514,6 +535,7 @@ type AppServer interface {
 	AdminLocationAllList(context.Context, *AdminLocationAllListRequest) (*AdminLocationAllListReply, error)
 	AdminWithdrawList(context.Context, *AdminWithdrawListRequest) (*AdminWithdrawListReply, error)
 	AdminWithdraw(context.Context, *AdminWithdrawRequest) (*AdminWithdrawReply, error)
+	AdminTrade(context.Context, *AdminTradeRequest) (*AdminTradeReply, error)
 	AdminWithdrawPass(context.Context, *AdminWithdrawPassRequest) (*AdminWithdrawPassReply, error)
 	AdminWithdrawEth(context.Context, *AdminWithdrawEthRequest) (*AdminWithdrawEthReply, error)
 	AdminFee(context.Context, *AdminFeeRequest) (*AdminFeeReply, error)
@@ -573,6 +595,9 @@ func (UnimplementedAppServer) Withdraw(context.Context, *WithdrawRequest) (*With
 func (UnimplementedAppServer) Deposit(context.Context, *DepositRequest) (*DepositReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deposit not implemented")
 }
+func (UnimplementedAppServer) Deposit3(context.Context, *DepositRequest) (*DepositReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Deposit3 not implemented")
+}
 func (UnimplementedAppServer) Deposit2(context.Context, *DepositRequest) (*DepositReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deposit2 not implemented")
 }
@@ -602,6 +627,9 @@ func (UnimplementedAppServer) AdminWithdrawList(context.Context, *AdminWithdrawL
 }
 func (UnimplementedAppServer) AdminWithdraw(context.Context, *AdminWithdrawRequest) (*AdminWithdrawReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminWithdraw not implemented")
+}
+func (UnimplementedAppServer) AdminTrade(context.Context, *AdminTradeRequest) (*AdminTradeReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminTrade not implemented")
 }
 func (UnimplementedAppServer) AdminWithdrawPass(context.Context, *AdminWithdrawPassRequest) (*AdminWithdrawPassReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminWithdrawPass not implemented")
@@ -844,6 +872,24 @@ func _App_Deposit_Handler(srv interface{}, ctx context.Context, dec func(interfa
 	return interceptor(ctx, in, info, handler)
 }
 
+func _App_Deposit3_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DepositRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).Deposit3(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/Deposit3",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).Deposit3(ctx, req.(*DepositRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _App_Deposit2_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DepositRequest)
 	if err := dec(in); err != nil {
@@ -1020,6 +1066,24 @@ func _App_AdminWithdraw_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).AdminWithdraw(ctx, req.(*AdminWithdrawRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _App_AdminTrade_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminTradeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminTrade(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/AdminTrade",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminTrade(ctx, req.(*AdminTradeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1568,6 +1632,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _App_Deposit_Handler,
 		},
 		{
+			MethodName: "Deposit3",
+			Handler:    _App_Deposit3_Handler,
+		},
+		{
 			MethodName: "Deposit2",
 			Handler:    _App_Deposit2_Handler,
 		},
@@ -1606,6 +1674,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminWithdraw",
 			Handler:    _App_AdminWithdraw_Handler,
+		},
+		{
+			MethodName: "AdminTrade",
+			Handler:    _App_AdminTrade_Handler,
 		},
 		{
 			MethodName: "AdminWithdrawPass",

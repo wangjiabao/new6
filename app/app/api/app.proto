@@ -67,6 +67,12 @@ service App {
 		};
 	};
 
+	rpc Deposit3 (DepositRequest) returns (DepositReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/deposit_3"
+		};
+	};
+
 	rpc Deposit2 (DepositRequest) returns (DepositReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/deposit_2"
@@ -124,6 +130,12 @@ service App {
 	rpc AdminWithdraw (AdminWithdrawRequest) returns (AdminWithdrawReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/withdraw"
+		};
+	};
+
+	rpc AdminTrade (AdminTradeRequest) returns (AdminTradeReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/trade"
 		};
 	};
 
@@ -567,6 +579,12 @@ message AdminWithdrawRequest {
 }
 
 message AdminWithdrawReply {
+}
+
+message AdminTradeRequest {
+}
+
+message AdminTradeReply {
 }
 
 message AdminWithdrawPassRequest {

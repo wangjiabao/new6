@@ -4199,6 +4199,208 @@ var _ interface {
 	ErrorName() string
 } = AdminWithdrawReplyValidationError{}
 
+// Validate checks the field values on AdminTradeRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *AdminTradeRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AdminTradeRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// AdminTradeRequestMultiError, or nil if none found.
+func (m *AdminTradeRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminTradeRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return AdminTradeRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminTradeRequestMultiError is an error wrapping multiple validation errors
+// returned by AdminTradeRequest.ValidateAll() if the designated constraints
+// aren't met.
+type AdminTradeRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminTradeRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminTradeRequestMultiError) AllErrors() []error { return m }
+
+// AdminTradeRequestValidationError is the validation error returned by
+// AdminTradeRequest.Validate if the designated constraints aren't met.
+type AdminTradeRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminTradeRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminTradeRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminTradeRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminTradeRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminTradeRequestValidationError) ErrorName() string {
+	return "AdminTradeRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AdminTradeRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminTradeRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminTradeRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminTradeRequestValidationError{}
+
+// Validate checks the field values on AdminTradeReply with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *AdminTradeReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AdminTradeReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// AdminTradeReplyMultiError, or nil if none found.
+func (m *AdminTradeReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminTradeReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return AdminTradeReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminTradeReplyMultiError is an error wrapping multiple validation errors
+// returned by AdminTradeReply.ValidateAll() if the designated constraints
+// aren't met.
+type AdminTradeReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminTradeReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminTradeReplyMultiError) AllErrors() []error { return m }
+
+// AdminTradeReplyValidationError is the validation error returned by
+// AdminTradeReply.Validate if the designated constraints aren't met.
+type AdminTradeReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminTradeReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminTradeReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminTradeReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminTradeReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminTradeReplyValidationError) ErrorName() string { return "AdminTradeReplyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e AdminTradeReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminTradeReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminTradeReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminTradeReplyValidationError{}
+
 // Validate checks the field values on AdminWithdrawPassRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.

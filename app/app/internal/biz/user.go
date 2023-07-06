@@ -104,6 +104,17 @@ type Withdraw struct {
 	CreatedAt       time.Time
 }
 
+type Trade struct {
+	ID           int64
+	UserId       int64
+	AmountCsd    int64
+	RelAmountCsd int64
+	AmountHbs    int64
+	RelAmountHbs int64
+	Status       string
+	CreatedAt    time.Time
+}
+
 type UserUseCase struct {
 	repo                          UserRepo
 	urRepo                        UserRecommendRepo
@@ -209,15 +220,22 @@ type UserBalanceRepo interface {
 	UpdateWithdrawAmount(ctx context.Context, id int64, status string, amount int64) (*Withdraw, error)
 	GetUserRewardRecommendSort(ctx context.Context) ([]*UserSortRecommendReward, error)
 	UpdateBalance(ctx context.Context, userId int64, amount int64) (bool, error)
+	UpdateTrade(ctx context.Context, id int64, status string) (*Trade, error)
+	GetTradeNotDeal(ctx context.Context) ([]*Trade, error)
 
 	UpdateWithdrawPass(ctx context.Context, id int64) (*Withdraw, error)
 	UserDailyBalanceReward(ctx context.Context, userId int64, rewardAmount int64, amount int64, amountDhb int64, status string) (int64, error)
 	GetBalanceRewardCurrent(ctx context.Context, now time.Time) ([]*BalanceReward, error)
 	UserDailyLocationReward(ctx context.Context, userId int64, rewardAmount int64, amount int64, coinAmount int64, status string, locationId int64) (int64, error)
 	DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastUsdtAmount int64, lastCoinAmount int64) (int64, error)
+	DepositLastNewDhb(ctx context.Context, userId int64, lastCoinAmount int64) error
 	UpdateBalanceRewardLastRewardDate(ctx context.Context, id int64) error
 	UpdateLocationAgain(ctx context.Context, locations []*LocationNew) error
 	LocationNewDailyReward(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
+	WithdrawNewRewardRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
+	WithdrawNewRewardTeamRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
+	WithdrawNewRewardSecondRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
+	WithdrawNewRewardLevelRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
 }
 
 type UserRecommendRepo interface {
@@ -1503,62 +1521,222 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 	}, nil
 }
 
-func (uuc *UserUseCase) AdminWithdraw(ctx context.Context, req *v1.AdminWithdrawRequest) (*v1.AdminWithdrawReply, error) {
+func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeRequest) (*v1.AdminTradeReply, error) {
 	//time.Sleep(30 * time.Second) // 错开时间和充值
 	var (
-		currentValue    int64
-		withdrawNotDeal []*Withdraw
-		configs         []*Config
-		withdrawRate    int64
-		err             error
+		tradeNotDeal                []*Trade
+		configs                     []*Config
+		withdrawRate                int64
+		withdrawRecommendRate       int64
+		withdrawRecommendSecondRate int64
+		withdrawTeamVipRate         int64
+		withdrawTeamVipSecondRate   int64
+		withdrawTeamVipThirdRate    int64
+		withdrawTeamVipFourthRate   int64
+		withdrawTeamVipFifthRate    int64
+		withdrawTeamVipLevelRate    int64
+		err                         error
 	)
 	// 配置
-	configs, _ = uuc.configRepo.GetConfigByKeys(ctx, "withdraw_rate")
+	configs, _ = uuc.configRepo.GetConfigByKeys(ctx, "withdraw_rate",
+		"withdraw_recommend_rate", "withdraw_recommend_second_rate",
+		"withdraw_team_vip_rate", "withdraw_team_vip_second_rate",
+		"withdraw_team_vip_third_rate", "withdraw_team_vip_fourth_rate",
+		"withdraw_team_vip_fifth_rate", "withdraw_team_vip_level_rate",
+		"withdraw_destroy_rate",
+	)
 	if nil != configs {
 		for _, vConfig := range configs {
 			if "withdraw_rate" == vConfig.KeyName {
 				withdrawRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "withdraw_recommend_rate" == vConfig.KeyName {
+				withdrawRecommendRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "withdraw_recommend_second_rate" == vConfig.KeyName {
+				withdrawRecommendSecondRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "withdraw_team_vip_rate" == vConfig.KeyName {
+				withdrawTeamVipRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "withdraw_team_vip_second_rate" == vConfig.KeyName {
+				withdrawTeamVipSecondRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "withdraw_team_vip_third_rate" == vConfig.KeyName {
+				withdrawTeamVipThirdRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "withdraw_team_vip_fourth_rate" == vConfig.KeyName {
+				withdrawTeamVipFourthRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "withdraw_team_vip_fifth_rate" == vConfig.KeyName {
+				withdrawTeamVipFifthRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "withdraw_team_vip_level_rate" == vConfig.KeyName {
+				withdrawTeamVipLevelRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			}
 		}
 	}
 
-	withdrawNotDeal, err = uuc.ubRepo.GetWithdrawNotDeal(ctx)
-	if nil == withdrawNotDeal {
-		return &v1.AdminWithdrawReply{}, nil
+	tradeNotDeal, err = uuc.ubRepo.GetTradeNotDeal(ctx)
+	if nil == tradeNotDeal {
+		return &v1.AdminTradeReply{}, nil
 	}
 
-	for _, withdraw := range withdrawNotDeal {
+	for _, withdraw := range tradeNotDeal {
 		if "" != withdraw.Status {
 			continue
 		}
 
-		currentValue = withdraw.Amount
+		//if "dhb" == withdraw.Type { // 提现dhb
+		//	if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+		//		_, err = uuc.ubRepo.UpdateWithdrawAmount(ctx, withdraw.ID, "rewarded", currentValue)
+		//		if nil != err {
+		//			return err
+		//		}
+		//
+		//		return nil
+		//	}); nil != err {
+		//		return nil, err
+		//	}
+		//
+		//	continue
+		//}
 
-		if "dhb" == withdraw.Type { // 提现dhb
+		var (
+			userRecommend       *UserRecommend
+			tmpRecommendUserIds []string
+		)
+
+		// 推荐人
+		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, withdraw.UserId)
+		if nil != userRecommend {
+			continue
+		}
+		if "" != userRecommend.RecommendCode {
+			tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
+		}
+
+		lastKey := len(tmpRecommendUserIds) - 1
+		if 1 > lastKey {
+			continue
+		}
+
+		lastVip := int64(1)
+		levelRewardCount := 5
+		withdrawTeamVip := int64(0)
+		for i := 0; i <= lastKey; i++ {
+			// 有占位信息，推荐人推荐人的上一代
+			if lastKey-i <= 0 {
+				break
+			}
+
+			tmpMyTopUserRecommendUserId, _ := strconv.ParseInt(tmpRecommendUserIds[lastKey-i], 10, 64) // 最后一位是直推人
+			myUserTopRecommendUserInfo, _ := uuc.uiRepo.GetUserInfoByUserId(ctx, tmpMyTopUserRecommendUserId)
+			if nil == myUserTopRecommendUserInfo {
+				continue
+			}
+
+			rewardAmount := withdraw.AmountCsd * withdrawRate / 100
+
+			if 0 == i { // 当前用户被此人直推
+
+				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+					_, err = uuc.ubRepo.WithdrawNewRewardRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendRate/100, myUserTopRecommendUserInfo.ID)
+					if nil != err {
+						return err
+					}
+
+					return nil
+				}); nil != err {
+					continue
+				}
+
+				continue
+			} else if 1 == i { // 间接推
+				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+					_, err = uuc.ubRepo.WithdrawNewRewardSecondRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendSecondRate/100, myUserTopRecommendUserInfo.ID)
+					if nil != err {
+						return err
+					}
+
+					return nil
+				}); nil != err {
+					continue
+				}
+
+				continue
+			}
+
+			// 第三个才走这里
+			if 2 > myUserTopRecommendUserInfo.Vip {
+				continue
+			}
+
+			if lastVip > myUserTopRecommendUserInfo.Vip { // 上一个级别比我高
+				continue
+			}
+
+			// 平级奖
+			if lastVip == myUserTopRecommendUserInfo.Vip && 0 < levelRewardCount { // 上一个是vip1和以上且和我平级
+				lastVip = myUserTopRecommendUserInfo.Vip
+				levelRewardCount--
+				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+					_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, myUserTopRecommendUserInfo.ID)
+					if nil != err {
+						return err
+					}
+
+					return nil
+				}); nil != err {
+					continue
+				}
+				continue
+			}
+
+			// 会员团队
+			lastVip = myUserTopRecommendUserInfo.Vip
+			if withdrawTeamVipFifthRate < withdrawTeamVip {
+				continue
+			}
+			var tmp int64
 			if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-				_, err = uuc.ubRepo.UpdateWithdrawAmount(ctx, withdraw.ID, "rewarded", currentValue)
+
+				if 2 == myUserTopRecommendUserInfo.Vip {
+					tmp = withdrawTeamVipRate - withdrawTeamVip
+					withdrawTeamVip = withdrawTeamVipRate
+
+				} else if 3 == myUserTopRecommendUserInfo.Vip {
+					tmp = withdrawTeamVipSecondRate - withdrawTeamVip
+					withdrawTeamVip = withdrawTeamVipSecondRate
+
+				} else if 4 == myUserTopRecommendUserInfo.Vip {
+					tmp = withdrawTeamVipThirdRate - withdrawTeamVip
+					withdrawTeamVip = withdrawTeamVipThirdRate
+
+				} else if 5 == myUserTopRecommendUserInfo.Vip {
+					tmp = withdrawTeamVipFourthRate - withdrawTeamVip
+					withdrawTeamVip = withdrawTeamVipFourthRate
+
+				} else if 6 == myUserTopRecommendUserInfo.Vip {
+					tmp = withdrawTeamVipFifthRate - withdrawTeamVip
+					withdrawTeamVip = withdrawTeamVipFifthRate
+				}
+
+				_, err = uuc.ubRepo.WithdrawNewRewardTeamRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*tmp/100, myUserTopRecommendUserInfo.ID)
 				if nil != err {
 					return err
 				}
 
 				return nil
 			}); nil != err {
-				return nil, err
+				continue
 			}
-
-			continue
 		}
 
+		//withdraw.Amount*withdrawRate/100
 		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-			currentValue -= withdraw.Amount * withdrawRate / 100 // 手续费
-			fmt.Println(withdraw.Amount, currentValue)
+			//currentValue -= withdraw.Amount * withdrawRate / 100 // 手续费
+			//currentValue -= withdraw.Amount * withdrawDestroyRate / 100
+			//fmt.Println(withdraw.Amount, currentValue)
 			// 手续费记录
-			err = uuc.ubRepo.SystemFee(ctx, withdraw.Amount*withdrawRate/100, withdraw.ID)
-			if nil != err {
-				return err
-			}
+			//err = uuc.ubRepo.SystemFee(ctx, withdraw.Amount*withdrawRate/100, withdraw.ID)
+			//if nil != err {
+			//	return err
+			//}
 
-			_, err = uuc.ubRepo.UpdateWithdrawAmount(ctx, withdraw.ID, "rewarded", currentValue)
+			_, err = uuc.ubRepo.UpdateTrade(ctx, withdraw.ID, "ok")
 			if nil != err {
 				return err
 			}
@@ -1569,7 +1747,7 @@ func (uuc *UserUseCase) AdminWithdraw(ctx context.Context, req *v1.AdminWithdraw
 		}
 	}
 
-	return &v1.AdminWithdrawReply{}, nil
+	return &v1.AdminTradeReply{}, nil
 }
 
 func (uuc *UserUseCase) AdminDailyBalanceReward(ctx context.Context, req *v1.AdminDailyBalanceRewardRequest) (*v1.AdminDailyBalanceRewardReply, error) {

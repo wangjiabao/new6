@@ -46,6 +46,7 @@ type UserInfo struct {
 	UserId           int64
 	Vip              int64
 	HistoryRecommend int64
+	TeamCsdBalance   int64
 }
 
 type UserRecommendArea struct {
@@ -284,6 +285,7 @@ type UserRepo interface {
 	GetAdmins(ctx context.Context) ([]*Admin, error)
 	GetUsers(ctx context.Context, b *Pagination, address string, isLocation bool, vip int64) ([]*User, error, int64)
 	GetAllUsers(ctx context.Context) ([]*User, error)
+	GetAllUserInfos(ctx context.Context) ([]*UserInfo, error)
 	GetUserCount(ctx context.Context) (int64, error)
 	GetUserCountToday(ctx context.Context) (int64, error)
 	CreateAdminAuth(ctx context.Context, adminId int64, authId int64) (bool, error)
@@ -985,20 +987,20 @@ func (uuc *UserUseCase) AdminVipUpdate(ctx context.Context, req *v1.AdminVipUpda
 	res := &v1.AdminVipUpdateReply{}
 
 	if 5 == req.SendBody.Vip {
-		userInfo.Vip = 5
-		userInfo.HistoryRecommend = 10
+		userInfo.Vip = 6
+		userInfo.HistoryRecommend = 25
 	} else if 4 == req.SendBody.Vip {
-		userInfo.Vip = 4
-		userInfo.HistoryRecommend = 8
+		userInfo.Vip = 5
+		userInfo.HistoryRecommend = 20
 	} else if 3 == req.SendBody.Vip {
-		userInfo.Vip = 3
-		userInfo.HistoryRecommend = 6
+		userInfo.Vip = 4
+		userInfo.HistoryRecommend = 15
 	} else if 2 == req.SendBody.Vip {
-		userInfo.Vip = 2
-		userInfo.HistoryRecommend = 4
+		userInfo.Vip = 3
+		userInfo.HistoryRecommend = 10
 	} else if 1 == req.SendBody.Vip {
-		userInfo.Vip = 1
-		userInfo.HistoryRecommend = 2
+		userInfo.Vip = 2
+		userInfo.HistoryRecommend = 5
 	}
 
 	_, err = uuc.uiRepo.UpdateUserInfo(ctx, userInfo) // 推荐人信息修改
@@ -2584,79 +2586,135 @@ func (uuc *UserUseCase) CheckAndInsertRecommendArea(ctx context.Context, req *v1
 	return &v1.CheckAndInsertRecommendAreaReply{}, nil
 }
 
-func (uuc *UserUseCase) CheckAdminUserArea(ctx context.Context, req *v1.CheckAdminUserAreaRequest) (*v1.CheckAdminUserAreaReply, error) {
+func (uuc *UserUseCase) vipCheck(ctx context.Context, req *v1.CheckAdminUserAreaRequest) (*v1.CheckAdminUserAreaReply, error) {
 
 	var (
-		users []*User
-		err   error
+		users           []*UserInfo
+		configs         []*Config
+		vip5Balance     int64
+		vip4Balance     int64
+		vip3Balance     int64
+		vip2Balance     int64
+		vip1Balance     int64
+		vip5BalanceTeam int64
+		vip4BalanceTeam int64
+		vip3BalanceTeam int64
+		vip2BalanceTeam int64
+		vip1BalanceTeam int64
+		err             error
 	)
-	users, err = uuc.repo.GetAllUsers(ctx)
+	users, err = uuc.repo.GetAllUserInfos(ctx)
 	if nil != err {
 		return nil, err
 	}
 
-	// 创建记录
-	for _, user := range users {
-		_, err = uuc.urRepo.CreateUserArea(ctx, user)
+	configs, _ = uuc.configRepo.GetConfigByKeys(ctx, "vip_5_balance",
+		"vip_4_balance", "vip_3_balance", "vip_2_balance", "vip_1_balance",
+		"vip_5_balance_team", "vip_4_balance_team", "vip_3_balance_team", "vip_2_balance_team", "vip_1_balance_team")
+	if nil != configs {
+		for _, vConfig := range configs {
+			if "vip_5_balance" == vConfig.KeyName {
+				vip5Balance, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "vip_4_balance" == vConfig.KeyName {
+				vip4Balance, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "vip_3_balance" == vConfig.KeyName {
+				vip3Balance, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "vip_2_balance" == vConfig.KeyName {
+				vip2Balance, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "vip_1_balance" == vConfig.KeyName {
+				vip1Balance, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "vip_4_balance_team" == vConfig.KeyName {
+				vip4BalanceTeam, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "vip_3_balance_team" == vConfig.KeyName {
+				vip3BalanceTeam, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "vip_2_balance_team" == vConfig.KeyName {
+				vip2BalanceTeam, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "vip_1_balance_team" == vConfig.KeyName {
+				vip1BalanceTeam, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "vip_5_balance_team" == vConfig.KeyName {
+				vip5BalanceTeam, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			}
+		}
 	}
 
 	for _, user := range users {
 		var (
-			userRecommend                  *UserRecommend
-			userRecommends                 []*UserRecommend
-			myLocations                    []*Location
-			myRecommendUserLocations       []*Location
-			userRecommendsUserIds          []int64
-			myCode                         string
-			myLocationsAmount              int64
-			myRecommendUserLocationsAmount int64
+			userRecommend         *UserRecommend
+			userRecommends        []*UserRecommend
+			userBalance           *UserBalance
+			UserInfos             map[int64]*UserInfo
+			userRecommendsUserIds []int64
+			myCode                string
+			teamCsdBalance        int64
+			myUserBalance         int64
+			vip1Count             int64
+			vip2Count             int64
+			vip3Count             int64
+			vip4Count             int64
+			myVip                 int64 = 1
 		)
+
+		if 1 > user.Vip {
+			continue
+		}
+
 		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, user.ID)
+		if nil != err {
+			continue
+		}
+
+		userBalance, err = uuc.ubRepo.GetUserBalance(ctx, user.ID)
 		if nil != err {
 			continue
 		}
 
 		// 我的伞下所有用户
 		myCode = userRecommend.RecommendCode + "D" + strconv.FormatInt(user.ID, 10)
-		userRecommends, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, myCode)
+		userRecommends, err = uuc.urRepo.GetUserRecommendByCode(ctx, myCode)
 		if nil == err {
 			for _, vUserRecommends := range userRecommends {
 				userRecommendsUserIds = append(userRecommendsUserIds, vUserRecommends.UserId)
 			}
 		}
 		if 0 < len(userRecommendsUserIds) {
-			myRecommendUserLocations, err = uuc.locationRepo.GetLocationsByUserIds(ctx, userRecommendsUserIds)
-			if nil == err {
-				for _, vMyRecommendUserLocations := range myRecommendUserLocations {
-					myRecommendUserLocationsAmount += vMyRecommendUserLocations.CurrentMax / 50000000000
-				}
-			}
+			UserInfos, err = uuc.uiRepo.GetUserInfoByUserIds(ctx, userRecommendsUserIds...)
 		}
 
-		// 自己的
-		myLocations, err = uuc.locationRepo.GetLocationsByUserId(ctx, user.ID)
-		if nil == err {
-			for _, vMyLocations := range myLocations {
-				myLocationsAmount += vMyLocations.CurrentMax / 50000000000
+		for _, vUserInfos := range UserInfos {
+			teamCsdBalance += vUserInfos.TeamCsdBalance
+			if 2 == vUserInfos.Vip {
+				vip1Count++
+			} else if 3 == vUserInfos.Vip {
+				vip2Count++
+			} else if 4 == vUserInfos.Vip {
+				vip3Count++
+			} else if 5 == vUserInfos.Vip {
+				vip4Count++
 			}
+		}
+		teamCsdBalance = teamCsdBalance / 1000000000
+		myUserBalance = userBalance.BalanceUsdt / 1000000000
+
+		if teamCsdBalance >= vip5BalanceTeam && 2 <= vip4Count && 25 < user.HistoryRecommend && myUserBalance >= vip5Balance {
+			myVip = 6
+		} else if teamCsdBalance >= vip4BalanceTeam && 2 <= vip3Count && 20 < user.HistoryRecommend && myUserBalance >= vip4Balance {
+			myVip = 5
+		} else if teamCsdBalance >= vip3BalanceTeam && 2 <= vip2Count && 15 < user.HistoryRecommend && myUserBalance >= vip3Balance {
+			myVip = 4
+		} else if teamCsdBalance >= vip2BalanceTeam && 2 <= vip1Count && 10 < user.HistoryRecommend && myUserBalance >= vip2Balance {
+			myVip = 3
+		} else if teamCsdBalance >= vip1BalanceTeam && 5 < user.HistoryRecommend && myUserBalance >= vip1Balance {
+			myVip = 2
 		}
 
 		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-			if 0 < myLocationsAmount {
-				// 修改用户推荐人区数据，修改自身区数据
-				_, err = uuc.urRepo.UpdateUserAreaSelfAmount(ctx, user.ID, myLocationsAmount)
-				if nil != err {
-					return err
-				}
 
+			// 修改用户推荐人区数据，修改自身区数据
+			_, err = uuc.uiRepo.UpdateUserInfoVip(ctx, user.ID, myVip)
+			if nil != err {
+				return err
 			}
 
-			if 0 < myRecommendUserLocationsAmount {
-				_, err = uuc.urRepo.UpdateUserAreaAmount(ctx, user.ID, myRecommendUserLocationsAmount)
-				if nil != err {
-					return err
-				}
-			}
 			return nil
 		}); err != nil {
 			return nil, err
@@ -2666,80 +2724,10 @@ func (uuc *UserUseCase) CheckAdminUserArea(ctx context.Context, req *v1.CheckAdm
 	return &v1.CheckAdminUserAreaReply{}, nil
 }
 
+func (uuc *UserUseCase) CheckAdminUserArea(ctx context.Context, req *v1.CheckAdminUserAreaRequest) (*v1.CheckAdminUserAreaReply, error) {
+	return &v1.CheckAdminUserAreaReply{}, nil
+}
+
 func (uuc *UserUseCase) CheckAndInsertLocationsRecommendUser(ctx context.Context, req *v1.CheckAndInsertLocationsRecommendUserRequest) (*v1.CheckAndInsertLocationsRecommendUserReply, error) {
-
-	var (
-		locations []*Location
-		err       error
-	)
-	locations, err = uuc.locationRepo.GetAllLocations(ctx)
-
-	for _, v := range locations {
-		var (
-			userRecommend           *UserRecommend
-			tmpRecommendUserIds     []string
-			myUserRecommendUserId   int64
-			myUserRecommendUserInfo *UserInfo
-			myLocations             []*Location
-		)
-
-		myLocations, err = uuc.locationRepo.GetLocationsByUserId(ctx, v.UserId)
-		if nil == myLocations { // 查询异常跳过本次循环
-			continue
-		}
-
-		// 推荐人
-		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, v.UserId)
-		if nil != err {
-			continue
-		}
-		if "" != userRecommend.RecommendCode {
-			tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
-			if 2 <= len(tmpRecommendUserIds) {
-				myUserRecommendUserId, _ = strconv.ParseInt(tmpRecommendUserIds[len(tmpRecommendUserIds)-1], 10, 64) // 最后一位是直推人
-			}
-		}
-		if 0 < myUserRecommendUserId {
-			myUserRecommendUserInfo, err = uuc.uiRepo.GetUserInfoByUserId(ctx, myUserRecommendUserId)
-		}
-
-		// 推荐人
-		if nil != myUserRecommendUserInfo {
-			if 1 == len(myLocations) { // vip 等级调整，被推荐人首次入单
-				myUserRecommendUserInfo.HistoryRecommend += 1
-				if myUserRecommendUserInfo.HistoryRecommend >= 10 {
-					myUserRecommendUserInfo.Vip = 5
-				} else if myUserRecommendUserInfo.HistoryRecommend >= 8 {
-					myUserRecommendUserInfo.Vip = 4
-				} else if myUserRecommendUserInfo.HistoryRecommend >= 6 {
-					myUserRecommendUserInfo.Vip = 3
-				} else if myUserRecommendUserInfo.HistoryRecommend >= 4 {
-					myUserRecommendUserInfo.Vip = 2
-				} else if myUserRecommendUserInfo.HistoryRecommend >= 2 {
-					myUserRecommendUserInfo.Vip = 1
-				}
-				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					_, err = uuc.uiRepo.UpdateUserInfo(ctx, myUserRecommendUserInfo) // 推荐人信息修改
-					if nil != err {
-						return err
-					}
-
-					_, err = uuc.userCurrentMonthRecommendRepo.CreateUserCurrentMonthRecommend(ctx, &UserCurrentMonthRecommend{ // 直推人本月推荐人数
-						UserId:          myUserRecommendUserId,
-						RecommendUserId: v.UserId,
-						Date:            time.Now().UTC().Add(8 * time.Hour),
-					})
-					if nil != err {
-						return err
-					}
-
-					return nil
-				}); nil != err {
-					continue
-				}
-			}
-		}
-	}
-
 	return &v1.CheckAndInsertLocationsRecommendUserReply{}, nil
 }

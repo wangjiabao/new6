@@ -32,6 +32,7 @@ type UserInfo struct {
 	UserId           int64     `gorm:"type:int;not null"`
 	Vip              int64     `gorm:"type:int;not null"`
 	HistoryRecommend int64     `gorm:"type:int;not null"`
+	TeamCsdBalance   int64     `gorm:"type:bigint;not null"`
 	CreatedAt        time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt        time.Time `gorm:"type:datetime;not null"`
 }
@@ -484,6 +485,30 @@ func (u *UserRepo) GetAllUsers(ctx context.Context) ([]*biz.User, error) {
 		res = append(res, &biz.User{
 			ID:      item.ID,
 			Address: item.Address,
+		})
+	}
+	return res, nil
+}
+
+// GetAllUserInfos .
+func (u *UserRepo) GetAllUserInfos(ctx context.Context) ([]*biz.UserInfo, error) {
+	var users []*UserInfo
+	if err := u.data.db.Table("user_info").Find(&users).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("USER_NOT_FOUND", "user not found")
+		}
+
+		return nil, errors.New(500, "USER ERROR", err.Error())
+	}
+
+	res := make([]*biz.UserInfo, 0)
+	for _, item := range users {
+		res = append(res, &biz.UserInfo{
+			ID:               item.ID,
+			UserId:           item.UserId,
+			Vip:              item.Vip,
+			HistoryRecommend: item.HistoryRecommend,
+			TeamCsdBalance:   item.TeamCsdBalance,
 		})
 	}
 	return res, nil

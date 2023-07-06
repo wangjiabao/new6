@@ -65,6 +65,7 @@ const OperationAppRecommendRewardList = "/api.App/RecommendRewardList"
 const OperationAppRewardList = "/api.App/RewardList"
 const OperationAppUserAuthList = "/api.App/UserAuthList"
 const OperationAppUserInfo = "/api.App/UserInfo"
+const OperationAppvipCheck = "/api.App/vipCheck"
 const OperationAppWithdraw = "/api.App/Withdraw"
 const OperationAppWithdrawList = "/api.App/WithdrawList"
 
@@ -115,6 +116,7 @@ type AppHTTPServer interface {
 	RewardList(context.Context, *RewardListRequest) (*RewardListReply, error)
 	UserAuthList(context.Context, *UserAuthListRequest) (*UserAuthListReply, error)
 	UserInfo(context.Context, *UserInfoRequest) (*UserInfoReply, error)
+	VipCheck(context.Context, *VipCheckRequest) (*VipCheckReply, error)
 	Withdraw(context.Context, *WithdrawRequest) (*WithdrawReply, error)
 	WithdrawList(context.Context, *WithdrawListRequest) (*WithdrawListReply, error)
 }
@@ -130,6 +132,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.POST("/api/app_server/withdraw", _App_Withdraw0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit", _App_Deposit0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit_3", _App_Deposit30_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/vip_check", _App_VipCheck0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit_2", _App_Deposit20_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/reward_list", _App_AdminRewardList0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/lock_system", _App_LockSystem0_HTTP_Handler(srv))
@@ -341,6 +344,25 @@ func _App_Deposit30_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error
 			return err
 		}
 		reply := out.(*DepositReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _App_VipCheck0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in VipCheckRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppvipCheck)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.VipCheck(ctx, req.(*VipCheckRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*VipCheckReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -1169,6 +1191,7 @@ type AppHTTPClient interface {
 	RewardList(ctx context.Context, req *RewardListRequest, opts ...http.CallOption) (rsp *RewardListReply, err error)
 	UserAuthList(ctx context.Context, req *UserAuthListRequest, opts ...http.CallOption) (rsp *UserAuthListReply, err error)
 	UserInfo(ctx context.Context, req *UserInfoRequest, opts ...http.CallOption) (rsp *UserInfoReply, err error)
+	VipCheck(ctx context.Context, req *VipCheckRequest, opts ...http.CallOption) (rsp *VipCheckReply, err error)
 	Withdraw(ctx context.Context, req *WithdrawRequest, opts ...http.CallOption) (rsp *WithdrawReply, err error)
 	WithdrawList(ctx context.Context, req *WithdrawListRequest, opts ...http.CallOption) (rsp *WithdrawListReply, err error)
 }
@@ -1771,6 +1794,19 @@ func (c *AppHTTPClientImpl) UserInfo(ctx context.Context, in *UserInfoRequest, o
 	pattern := "/api/app_server/user_info"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAppUserInfo))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) VipCheck(ctx context.Context, in *VipCheckRequest, opts ...http.CallOption) (*VipCheckReply, error) {
+	var out VipCheckReply
+	pattern := "/api/admin_dhb/vip_check"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppvipCheck))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

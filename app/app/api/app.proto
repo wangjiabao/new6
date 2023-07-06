@@ -73,6 +73,12 @@ service App {
 		};
 	};
 
+	rpc vipCheck (vipCheckRequest) returns (vipCheckReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/vip_check"
+		};
+	};
+
 	rpc Deposit2 (DepositRequest) returns (DepositReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/deposit_2"
@@ -338,6 +344,12 @@ message DepositRequest {
 }
 
 message DepositReply {
+}
+
+message vipCheckRequest {
+}
+
+message vipCheckReply {
 }
 
 message UserInfoRequest {

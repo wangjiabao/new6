@@ -2586,7 +2586,7 @@ func (uuc *UserUseCase) CheckAndInsertRecommendArea(ctx context.Context, req *v1
 	return &v1.CheckAndInsertRecommendAreaReply{}, nil
 }
 
-func (uuc *UserUseCase) vipCheck(ctx context.Context, req *v1.CheckAdminUserAreaRequest) (*v1.CheckAdminUserAreaReply, error) {
+func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (*v1.VipCheckReply, error) {
 
 	var (
 		users           []*UserInfo
@@ -2721,7 +2721,7 @@ func (uuc *UserUseCase) vipCheck(ctx context.Context, req *v1.CheckAdminUserArea
 		}
 	}
 
-	return &v1.CheckAdminUserAreaReply{}, nil
+	return &v1.VipCheckReply{}, nil
 }
 
 func (uuc *UserUseCase) CheckAdminUserArea(ctx context.Context, req *v1.CheckAdminUserAreaRequest) (*v1.CheckAdminUserAreaReply, error) {

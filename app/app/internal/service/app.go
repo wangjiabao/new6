@@ -709,6 +709,10 @@ func (a *AppService) AdminVipUpdate(ctx context.Context, req *v1.AdminVipUpdateR
 	return a.uuc.AdminVipUpdate(ctx, req)
 }
 
+func (a *AppService) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (*v1.VipCheckReply, error) {
+	return a.uuc.VipCheck(ctx, req)
+}
+
 func (a *AppService) AdminUndoUpdate(ctx context.Context, req *v1.AdminUndoUpdateRequest) (*v1.AdminUndoUpdateReply, error) {
 	return a.uuc.AdminUndoUpdate(ctx, req)
 }

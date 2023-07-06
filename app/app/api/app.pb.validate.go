@@ -469,6 +469,206 @@ var _ interface {
 	ErrorName() string
 } = DepositReplyValidationError{}
 
+// Validate checks the field values on VipCheckRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *VipCheckRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on VipCheckRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// VipCheckRequestMultiError, or nil if none found.
+func (m *VipCheckRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *VipCheckRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return VipCheckRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// VipCheckRequestMultiError is an error wrapping multiple validation errors
+// returned by VipCheckRequest.ValidateAll() if the designated constraints
+// aren't met.
+type VipCheckRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m VipCheckRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m VipCheckRequestMultiError) AllErrors() []error { return m }
+
+// VipCheckRequestValidationError is the validation error returned by
+// VipCheckRequest.Validate if the designated constraints aren't met.
+type VipCheckRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e VipCheckRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e VipCheckRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e VipCheckRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e VipCheckRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e VipCheckRequestValidationError) ErrorName() string { return "VipCheckRequestValidationError" }
+
+// Error satisfies the builtin error interface
+func (e VipCheckRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sVipCheckRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = VipCheckRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = VipCheckRequestValidationError{}
+
+// Validate checks the field values on VipCheckReply with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *VipCheckReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on VipCheckReply with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in VipCheckReplyMultiError, or
+// nil if none found.
+func (m *VipCheckReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *VipCheckReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return VipCheckReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// VipCheckReplyMultiError is an error wrapping multiple validation errors
+// returned by VipCheckReply.ValidateAll() if the designated constraints
+// aren't met.
+type VipCheckReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m VipCheckReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m VipCheckReplyMultiError) AllErrors() []error { return m }
+
+// VipCheckReplyValidationError is the validation error returned by
+// VipCheckReply.Validate if the designated constraints aren't met.
+type VipCheckReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e VipCheckReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e VipCheckReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e VipCheckReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e VipCheckReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e VipCheckReplyValidationError) ErrorName() string { return "VipCheckReplyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e VipCheckReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sVipCheckReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = VipCheckReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = VipCheckReplyValidationError{}
+
 // Validate checks the field values on UserInfoRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
 // first error encountered is returned, or nil if there are no violations.

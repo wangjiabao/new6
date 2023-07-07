@@ -760,6 +760,7 @@ func (a *AppService) LockSystem(ctx context.Context, req *v1.LockSystemRequest) 
 func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdrawEthRequest) (*v1.AdminWithdrawEthReply, error) {
 	var (
 		withdraw     *biz.Withdraw
+		trade        *biz.Trade
 		userIds      []int64
 		userIdsMap   map[int64]int64
 		users        map[int64]*biz.User
@@ -852,6 +853,88 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		//	}
 		//}
 
+	}
+
+	var (
+		configs             []*biz.Config
+		withdrawDestoryRate int64
+	)
+	configs, _ = a.uuc.GetConfigWithdrawDestroyRate(ctx)
+	if nil != configs {
+		for _, vConfig := range configs {
+			if "withdraw_destroy_rate" == vConfig.KeyName {
+				withdrawDestoryRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			}
+		}
+	}
+
+	for {
+
+		trade, err = a.uuc.GetTradeOk(ctx)
+		if nil == trade {
+			break
+		}
+
+		_, err = a.uuc.UpdateTradeDoing(ctx, trade.ID)
+		if nil != err {
+			continue
+		}
+
+		//if "dhb" == withdraw.Type {
+		//	tokenAddress = "0x6504631df9F6FF397b0ec442FB80685a7B1688d4"
+		//} else
+
+		//if "usdt" == trade.Type {
+		//	//tokenAddress = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd"
+		//	tokenAddress = "0x0BAEfDB75cA6CA9A0d1685086829F3Ea9dDA9f5E"
+		//} else if "dhb" == withdraw.Type {
+		//	tokenAddress = "0x0905397af05dd0bdf76690ff318b10c6216e3069"
+		//} else {
+		//	continue
+		//}
+
+		tradeCsd := strconv.FormatInt(trade.AmountCsd/100*withdrawDestoryRate, 10) + "00000000" // 补八个0.系统基础1是10个0
+
+		for i := 0; i < 3; i++ {
+			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
+			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeCsd, "0x0BAEfDB75cA6CA9A0d1685086829F3Ea9dDA9f5E")
+			fmt.Println(3333, err)
+			if err == nil {
+				_, err = a.uuc.UpdateTrade(ctx, trade.ID)
+				//time.Sleep(3 * time.Second)
+				break
+			} else if "insufficient funds for gas * price + value" == err.Error() {
+				_, _, err = toBnB("", "", 400000000000000000)
+				if nil != err {
+					fmt.Println(5555, err)
+					continue
+				}
+				time.Sleep(7 * time.Second)
+			} else {
+				time.Sleep(3 * time.Second)
+			}
+		}
+
+		tradeHbs := strconv.FormatInt(trade.AmountHbs/100*withdrawDestoryRate, 10) + "00000000" // 补八个0.系统基础1是10个0
+		for i := 0; i < 3; i++ {
+			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
+			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeHbs, "0x0905397af05dd0bdf76690ff318b10c6216e3069")
+			fmt.Println(3333, err)
+			if err == nil {
+				_, err = a.uuc.UpdateTrade(ctx, trade.ID)
+				//time.Sleep(3 * time.Second)
+				break
+			} else if "insufficient funds for gas * price + value" == err.Error() {
+				_, _, err = toBnB("", "", 400000000000000000)
+				if nil != err {
+					fmt.Println(5555, err)
+					continue
+				}
+				time.Sleep(7 * time.Second)
+			} else {
+				time.Sleep(3 * time.Second)
+			}
+		}
 	}
 
 	return &v1.AdminWithdrawEthReply{}, nil

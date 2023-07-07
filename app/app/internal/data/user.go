@@ -1565,11 +1565,34 @@ func (ub *UserBalanceRepo) UpdateTrade(ctx context.Context, id int64, status str
 	}, nil
 }
 
+// GetTradeOk .
+func (ub *UserBalanceRepo) GetTradeOk(ctx context.Context) (*biz.Trade, error) {
+	var trade *Trade
+	if err := ub.data.db.Where("status=?", "ok").Table("trade").First(&trade).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("WITHDRAW_NOT_FOUND", "withdraw not found")
+		}
+
+		return nil, errors.New(500, "WITHDRAW ERROR", err.Error())
+	}
+
+	return &biz.Trade{
+		ID:           trade.ID,
+		UserId:       trade.UserId,
+		AmountCsd:    trade.AmountCsd,
+		RelAmountCsd: trade.RelAmountCsd,
+		AmountHbs:    trade.AmountHbs,
+		RelAmountHbs: trade.RelAmountHbs,
+		Status:       trade.Status,
+		CreatedAt:    trade.CreatedAt,
+	}, nil
+}
+
 // GetTradeNotDeal .
 func (ub *UserBalanceRepo) GetTradeNotDeal(ctx context.Context) ([]*biz.Trade, error) {
 	var trades []*Trade
 	res := make([]*biz.Trade, 0)
-	if err := ub.data.db.Where("status=?", "").Table("trade").Find(&trades).Error; err != nil {
+	if err := ub.data.db.Where("status=?", "default").Table("trade").Find(&trades).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return res, errors.NotFound("WITHDRAW_NOT_FOUND", "withdraw not found")
 		}
@@ -1787,7 +1810,7 @@ func (ub *UserBalanceRepo) GetWithdrawPassOrRewarded(ctx context.Context) ([]*bi
 // GetWithdrawPassOrRewardedFirst .
 func (ub *UserBalanceRepo) GetWithdrawPassOrRewardedFirst(ctx context.Context) (*biz.Withdraw, error) {
 	var withdraw *Withdraw
-	if err := ub.data.db.Table("withdraw").Where("status=?", "pass").First(&withdraw).Error; err != nil {
+	if err := ub.data.db.Table("withdraw").Where("status=?", "rewarded").First(&withdraw).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.NotFound("WITHDRAW_NOT_FOUND", "withdraw not found")
 		}

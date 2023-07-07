@@ -203,6 +203,7 @@ type UserBalanceRepo interface {
 	GetWithdraws(ctx context.Context, b *Pagination, userId int64, withdrawType string) ([]*Withdraw, error, int64)
 	GetWithdrawPassOrRewarded(ctx context.Context) ([]*Withdraw, error)
 	GetWithdrawPassOrRewardedFirst(ctx context.Context) (*Withdraw, error)
+	GetTradeOk(ctx context.Context) (*Trade, error)
 	UpdateWithdraw(ctx context.Context, id int64, status string) (*Withdraw, error)
 	GetWithdrawById(ctx context.Context, id int64) (*Withdraw, error)
 	GetWithdrawNotDeal(ctx context.Context) ([]*Withdraw, error)
@@ -1387,12 +1388,24 @@ func (uuc *UserUseCase) GetWithdrawPassOrRewardedFirst(ctx context.Context) (*Wi
 	return uuc.ubRepo.GetWithdrawPassOrRewardedFirst(ctx)
 }
 
+func (uuc *UserUseCase) GetTradeOk(ctx context.Context) (*Trade, error) {
+	return uuc.ubRepo.GetTradeOk(ctx)
+}
+
 func (uuc *UserUseCase) UpdateWithdrawDoing(ctx context.Context, id int64) (*Withdraw, error) {
 	return uuc.ubRepo.UpdateWithdraw(ctx, id, "doing")
 }
 
 func (uuc *UserUseCase) UpdateWithdrawSuccess(ctx context.Context, id int64) (*Withdraw, error) {
 	return uuc.ubRepo.UpdateWithdraw(ctx, id, "success")
+}
+
+func (uuc *UserUseCase) UpdateTrade(ctx context.Context, id int64) (*Trade, error) {
+	return uuc.ubRepo.UpdateTrade(ctx, id, "okk")
+}
+
+func (uuc *UserUseCase) UpdateTradeDoing(ctx context.Context, id int64) (*Trade, error) {
+	return uuc.ubRepo.UpdateTrade(ctx, id, "doing")
 }
 
 func (uuc *UserUseCase) AdminWithdrawList(ctx context.Context, req *v1.AdminWithdrawListRequest) (*v1.AdminWithdrawListReply, error) {
@@ -1523,6 +1536,10 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 	}, nil
 }
 
+func (uuc *UserUseCase) GetConfigWithdrawDestroyRate(ctx context.Context) ([]*Config, error) {
+	return uuc.configRepo.GetConfigByKeys(ctx, "withdraw_destroy_rate")
+}
+
 func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeRequest) (*v1.AdminTradeReply, error) {
 	//time.Sleep(30 * time.Second) // 错开时间和充值
 	var (
@@ -1635,7 +1652,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 			if 0 == i { // 当前用户被此人直推
 
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					_, err = uuc.ubRepo.WithdrawNewRewardRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendRate/100, myUserTopRecommendUserInfo.ID)
+					_, err = uuc.ubRepo.WithdrawNewRewardRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendRate/100, withdraw.ID)
 					if nil != err {
 						return err
 					}
@@ -1648,7 +1665,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 				continue
 			} else if 1 == i { // 间接推
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					_, err = uuc.ubRepo.WithdrawNewRewardSecondRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendSecondRate/100, myUserTopRecommendUserInfo.ID)
+					_, err = uuc.ubRepo.WithdrawNewRewardSecondRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendSecondRate/100, withdraw.ID)
 					if nil != err {
 						return err
 					}
@@ -1675,7 +1692,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 				lastVip = myUserTopRecommendUserInfo.Vip
 				levelRewardCount--
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, myUserTopRecommendUserInfo.ID)
+					_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, withdraw.ID)
 					if nil != err {
 						return err
 					}
@@ -1716,7 +1733,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 					withdrawTeamVip = withdrawTeamVipFifthRate
 				}
 
-				_, err = uuc.ubRepo.WithdrawNewRewardTeamRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*tmp/100, myUserTopRecommendUserInfo.ID)
+				_, err = uuc.ubRepo.WithdrawNewRewardTeamRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*tmp/100, withdraw.ID)
 				if nil != err {
 					return err
 				}

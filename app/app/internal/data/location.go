@@ -82,7 +82,7 @@ func (lr *LocationRepo) CreateLocation(ctx context.Context, rel *biz.Location) (
 }
 
 // CreateLocationNew .
-func (lr *LocationRepo) CreateLocationNew(ctx context.Context, rel *biz.LocationNew) (*biz.LocationNew, error) {
+func (lr *LocationRepo) CreateLocationNew(ctx context.Context, rel *biz.LocationNew, amount int64) (*biz.LocationNew, error) {
 	var location LocationNew
 	location.Status = rel.Status
 	location.Term = rel.Term
@@ -92,6 +92,17 @@ func (lr *LocationRepo) CreateLocationNew(ctx context.Context, rel *biz.Location
 	location.OutRate = rel.OutRate
 	location.StopDate = rel.StopDate
 	res := lr.data.DB(ctx).Table("location_new").Create(&location)
+	if res.Error != nil {
+		return nil, errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")
+	}
+
+	var userBalanceRecode UserBalanceRecord
+	userBalanceRecode.Balance = 0
+	userBalanceRecode.UserId = rel.UserId
+	userBalanceRecode.Type = "deposit"
+	userBalanceRecode.CoinType = "usdt"
+	userBalanceRecode.Amount = amount
+	res = lr.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")
 	}

@@ -1424,18 +1424,17 @@ components:
                     type: string
                 balanceDhb:
                     type: string
+                balanceUsdtLock:
+                    type: string
+                balanceDhbLock:
+                    type: string
                 vip:
-                    type: integer
-                    format: int64
-                monthRecommend:
                     type: integer
                     format: int64
                 historyRecommend:
                     type: integer
                     format: int64
-                areaAmount:
-                    type: string
-                areaMaxAmount:
+                TeamCsdBalance:
                     type: string
         AdminUserRecommendReply:
             type: object

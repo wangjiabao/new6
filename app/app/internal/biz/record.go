@@ -95,7 +95,7 @@ type LocationRepo interface {
 	GetAllLocationsNew(ctx context.Context) ([]*LocationNew, error)
 	GetLocationsByUserIds(ctx context.Context, userIds []int64) ([]*Location, error)
 
-	CreateLocationNew(ctx context.Context, rel *LocationNew) (*LocationNew, error)
+	CreateLocationNew(ctx context.Context, rel *LocationNew, amount int64) (*LocationNew, error)
 	GetMyStopLocationsLast(ctx context.Context, userId int64) ([]*LocationNew, error)
 	GetLocationsNewByUserId(ctx context.Context, userId int64) ([]*LocationNew, error)
 	UpdateLocationNew(ctx context.Context, id int64, status string, current int64, stopDate time.Time) error
@@ -264,7 +264,7 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 				Current:    locationCurrent,
 				CurrentMax: locationCurrentMax,
 				StopDate:   tmpStopDate,
-			})
+			}, v.RelAmount)
 			if nil != err {
 				return err
 			}

@@ -2997,6 +2997,30 @@ func (ub UserBalanceRepo) GetUserBalanceByUserIds(ctx context.Context, userIds .
 	return res, nil
 }
 
+// GetUserBalanceLockByUserIds .
+func (ub UserBalanceRepo) GetUserBalanceLockByUserIds(ctx context.Context, userIds ...int64) (map[int64]*biz.UserBalance, error) {
+	var userBalances []*UserBalance
+	res := make(map[int64]*biz.UserBalance)
+	if err := ub.data.db.Where("user_id IN (?)", userIds).Table("user_balance_lock").Find(&userBalances).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("USER_BALANCE_NOT_FOUND", "user balance not found")
+		}
+
+		return nil, errors.New(500, "USER BALANCE ERROR", err.Error())
+	}
+
+	for _, userBalance := range userBalances {
+		res[userBalance.UserId] = &biz.UserBalance{
+			ID:          userBalance.ID,
+			UserId:      userBalance.UserId,
+			BalanceUsdt: userBalance.BalanceUsdt,
+			BalanceDhb:  userBalance.BalanceDhb,
+		}
+	}
+
+	return res, nil
+}
+
 type UserBalanceTotal struct {
 	Total int64
 }
@@ -3278,6 +3302,7 @@ func (ui *UserInfoRepo) GetUserInfoByUserIds(ctx context.Context, userIds ...int
 			UserId:           userInfo.UserId,
 			Vip:              userInfo.Vip,
 			HistoryRecommend: userInfo.HistoryRecommend,
+			TeamCsdBalance:   userInfo.TeamCsdBalance,
 		}
 	}
 

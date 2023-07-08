@@ -706,7 +706,8 @@ func (a *AppService) AdminList(ctx context.Context, req *v1.AdminListRequest) (*
 }
 
 func (a *AppService) AdminVipUpdate(ctx context.Context, req *v1.AdminVipUpdateRequest) (*v1.AdminVipUpdateReply, error) {
-	return a.uuc.AdminVipUpdate(ctx, req)
+	//return a.uuc.AdminVipUpdate(ctx, req)
+	return &v1.AdminVipUpdateReply{}, nil
 }
 
 func (a *AppService) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (*v1.VipCheckReply, error) {
@@ -714,18 +715,20 @@ func (a *AppService) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (*v1
 }
 
 func (a *AppService) AdminUndoUpdate(ctx context.Context, req *v1.AdminUndoUpdateRequest) (*v1.AdminUndoUpdateReply, error) {
-	return a.uuc.AdminUndoUpdate(ctx, req)
+	//return a.uuc.AdminUndoUpdate(ctx, req)
+	return &v1.AdminUndoUpdateReply{}, nil
 }
 
 func (a *AppService) AdminAreaLevelUpdate(ctx context.Context, req *v1.AdminAreaLevelUpdateRequest) (*v1.AdminAreaLevelUpdateReply, error) {
-	return a.uuc.AdminAreaLevelUpdate(ctx, req)
+	//return a.uuc.AdminAreaLevelUpdate(ctx, req)
+	return &v1.AdminAreaLevelUpdateReply{}, nil
 }
 
 func (a *AppService) AdminLocationInsert(ctx context.Context, req *v1.AdminLocationInsertRequest) (*v1.AdminLocationInsertReply, error) {
-	_, err := a.ruc.AdminLocationInsert(ctx, req.SendBody.UserId, req.SendBody.Amount)
-	if nil != err {
-		return &v1.AdminLocationInsertReply{}, err
-	}
+	//_, err := a.ruc.AdminLocationInsert(ctx, req.SendBody.UserId, req.SendBody.Amount)
+	//if nil != err {
+	//	return &v1.AdminLocationInsertReply{}, err
+	//}
 	return &v1.AdminLocationInsertReply{}, nil
 }
 

@@ -11858,15 +11858,15 @@ func (m *AdminUserListReply_UserList) validate(all bool) error {
 
 	// no validation rules for BalanceDhb
 
-	// no validation rules for Vip
+	// no validation rules for BalanceUsdtLock
 
-	// no validation rules for MonthRecommend
+	// no validation rules for BalanceDhbLock
+
+	// no validation rules for Vip
 
 	// no validation rules for HistoryRecommend
 
-	// no validation rules for AreaAmount
-
-	// no validation rules for AreaMaxAmount
+	// no validation rules for TeamCsdBalance
 
 	if len(errors) > 0 {
 		return AdminUserListReply_UserListMultiError(errors)

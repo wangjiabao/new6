@@ -194,6 +194,7 @@ type UserBalanceRepo interface {
 	GetUserRewards(ctx context.Context, b *Pagination, userId int64, reason string) ([]*Reward, error, int64)
 	GetUserRewardsLastMonthFee(ctx context.Context) ([]*Reward, error)
 	GetUserBalanceByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserBalance, error)
+	GetUserBalanceLockByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserBalance, error)
 	GetUserBalanceUsdtTotal(ctx context.Context) (int64, error)
 	GetUserBalanceDHBTotal(ctx context.Context) (int64, error)
 	GreateWithdraw(ctx context.Context, userId int64, amount int64, coinType string) (*Withdraw, error)
@@ -432,13 +433,13 @@ func (uuc *UserUseCase) AdminRewardList(ctx context.Context, req *v1.AdminReward
 
 func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserListRequest) (*v1.AdminUserListReply, error) {
 	var (
-		users                          []*User
-		userIds                        []int64
-		userBalances                   map[int64]*UserBalance
-		userInfos                      map[int64]*UserInfo
-		userCurrentMonthRecommendCount map[int64]int64
-		count                          int64
-		err                            error
+		users            []*User
+		userIds          []int64
+		userBalances     map[int64]*UserBalance
+		userBalancesLock map[int64]*UserBalance
+		userInfos        map[int64]*UserInfo
+		count            int64
+		err              error
 	)
 
 	res := &v1.AdminUserListReply{
@@ -463,34 +464,21 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 		return res, nil
 	}
 
+	userBalancesLock, err = uuc.ubRepo.GetUserBalanceLockByUserIds(ctx, userIds...)
+	if nil != err {
+		return res, nil
+	}
+
 	userInfos, err = uuc.uiRepo.GetUserInfoByUserIds(ctx, userIds...)
 	if nil != err {
 		return res, nil
 	}
-
-	var (
-		myUserAreas []*UserArea
-	)
-
-	myUserAreasMap := make(map[int64]*UserArea, 0)
-	myUserAreas, err = uuc.urRepo.GetUserAreas(ctx, userIds)
-	if nil != err {
-		return res, nil
-	}
-	for _, vMyUserAreas := range myUserAreas {
-		myUserAreasMap[vMyUserAreas.UserId] = vMyUserAreas
-	}
-
-	userCurrentMonthRecommendCount, err = uuc.userCurrentMonthRecommendRepo.GetUserCurrentMonthRecommendCountByUserIds(ctx, userIds...)
 
 	for _, v := range users {
 		// 伞下业绩
 		var (
 			userRecommend      *UserRecommend
 			myRecommendUsers   []*UserRecommend
-			userAreas          []*UserArea
-			maxAreaAmount      int64
-			areaAmount         int64
 			myRecommendUserIds []int64
 		)
 
@@ -506,39 +494,15 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 				myRecommendUserIds = append(myRecommendUserIds, vMyRecommendUsers.UserId)
 			}
 		}
-		if 0 < len(myRecommendUserIds) {
-			userAreas, err = uuc.urRepo.GetUserAreas(ctx, myRecommendUserIds)
-			if nil == err {
-				var (
-					tmpTotalAreaAmount int64
-				)
-				for _, vUserAreas := range userAreas {
-					tmpAreaAmount := vUserAreas.Amount + vUserAreas.SelfAmount
-					tmpTotalAreaAmount += tmpAreaAmount
-					if tmpAreaAmount > maxAreaAmount {
-						maxAreaAmount = tmpAreaAmount
-					}
-				}
-
-				areaAmount = tmpTotalAreaAmount - maxAreaAmount
-			}
-		}
 
 		if _, ok := userBalances[v.ID]; !ok {
 			continue
 		}
+		if _, ok := userBalancesLock[v.ID]; !ok {
+			continue
+		}
 		if _, ok := userInfos[v.ID]; !ok {
 			continue
-		}
-		if _, ok := myUserAreasMap[v.ID]; !ok {
-			continue
-		}
-
-		var tmpCount int64
-		if nil != userCurrentMonthRecommendCount {
-			if _, ok := userCurrentMonthRecommendCount[v.ID]; ok {
-				tmpCount = userCurrentMonthRecommendCount[v.ID]
-			}
 		}
 
 		res.Users = append(res.Users, &v1.AdminUserListReply_UserList{
@@ -547,11 +511,11 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 			Address:          v.Address,
 			BalanceUsdt:      fmt.Sprintf("%.2f", float64(userBalances[v.ID].BalanceUsdt)/float64(10000000000)),
 			BalanceDhb:       fmt.Sprintf("%.2f", float64(userBalances[v.ID].BalanceDhb)/float64(10000000000)),
-			Vip:              myUserAreasMap[v.ID].Level,
-			MonthRecommend:   tmpCount,
-			AreaAmount:       fmt.Sprintf("%.2f", float64(areaAmount)/float64(100000)),
-			AreaMaxAmount:    fmt.Sprintf("%.2f", float64(maxAreaAmount)/float64(100000)),
+			BalanceUsdtLock:  fmt.Sprintf("%.2f", float64(userBalancesLock[v.ID].BalanceUsdt)/float64(10000000000)),
+			BalanceDhbLock:   fmt.Sprintf("%.2f", float64(userBalancesLock[v.ID].BalanceDhb)/float64(10000000000)),
+			Vip:              userInfos[v.ID].Vip,
 			HistoryRecommend: userInfos[v.ID].HistoryRecommend,
+			TeamCsdBalance:   fmt.Sprintf("%.2f", float64(userInfos[v.ID].TeamCsdBalance)/float64(10000000000)),
 		})
 	}
 

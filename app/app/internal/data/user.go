@@ -2353,7 +2353,7 @@ func (ub *UserBalanceRepo) NewNormalRecommendReward(ctx context.Context, userId 
 	}
 
 	var userBalance UserBalance
-	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance_lock").First(&userBalance).Error
 	if err != nil {
 		return 0, err
 	}
@@ -2435,7 +2435,7 @@ func (ub *UserBalanceRepo) LocationNewDailyReward(ctx context.Context, userId in
 	}
 
 	var userBalance UserBalance
-	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance_lock").First(&userBalance).Error
 	if err != nil {
 		return 0, err
 	}
@@ -2468,14 +2468,14 @@ func (ub *UserBalanceRepo) LocationNewDailyReward(ctx context.Context, userId in
 // WithdrawNewRewardTeamRecommend .
 func (ub *UserBalanceRepo) WithdrawNewRewardTeamRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error) {
 	var err error
-	if err = ub.data.DB(ctx).Table("user_balance").
+	if err = ub.data.DB(ctx).Table("user_balance_lock").
 		Where("user_id=?", userId).
 		Updates(map[string]interface{}{"balance_usdt": gorm.Expr("balance_usdt + ?", amount)}).Error; nil != err {
 		return 0, errors.NotFound("user balance err", "user balance not found")
 	}
 
 	var userBalance UserBalance
-	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance_lock").First(&userBalance).Error
 	if err != nil {
 		return 0, err
 	}
@@ -2496,7 +2496,7 @@ func (ub *UserBalanceRepo) WithdrawNewRewardTeamRecommend(ctx context.Context, u
 	reward.BalanceRecordId = userBalanceRecode.ID
 	reward.Type = "withdraw" // 本次分红的行为类型
 	reward.TypeRecordId = locationId
-	reward.Reason = "withdraw_recommend" // 给我分红的理由
+	reward.Reason = "recommend_team" // 给我分红的理由
 	err = ub.data.DB(ctx).Table("reward").Create(&reward).Error
 	if err != nil {
 		return 0, err
@@ -2515,7 +2515,7 @@ func (ub *UserBalanceRepo) WithdrawNewRewardRecommend(ctx context.Context, userI
 	}
 
 	var userBalance UserBalance
-	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance_lock").First(&userBalance).Error
 	if err != nil {
 		return 0, err
 	}
@@ -2536,7 +2536,7 @@ func (ub *UserBalanceRepo) WithdrawNewRewardRecommend(ctx context.Context, userI
 	reward.BalanceRecordId = userBalanceRecode.ID
 	reward.Type = "withdraw" // 本次分红的行为类型
 	reward.TypeRecordId = locationId
-	reward.Reason = "withdraw_recommend" // 给我分红的理由
+	reward.Reason = "recommend" // 给我分红的理由
 	err = ub.data.DB(ctx).Table("reward").Create(&reward).Error
 	if err != nil {
 		return 0, err
@@ -2555,7 +2555,7 @@ func (ub *UserBalanceRepo) WithdrawNewRewardSecondRecommend(ctx context.Context,
 	}
 
 	var userBalance UserBalance
-	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance_lock").First(&userBalance).Error
 	if err != nil {
 		return 0, err
 	}
@@ -2576,7 +2576,7 @@ func (ub *UserBalanceRepo) WithdrawNewRewardSecondRecommend(ctx context.Context,
 	reward.BalanceRecordId = userBalanceRecode.ID
 	reward.Type = "withdraw" // 本次分红的行为类型
 	reward.TypeRecordId = locationId
-	reward.Reason = "withdraw_second_recommend" // 给我分红的理由
+	reward.Reason = "second_recommend" // 给我分红的理由
 	err = ub.data.DB(ctx).Table("reward").Create(&reward).Error
 	if err != nil {
 		return 0, err
@@ -2595,7 +2595,7 @@ func (ub *UserBalanceRepo) WithdrawNewRewardLevelRecommend(ctx context.Context, 
 	}
 
 	var userBalance UserBalance
-	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance").First(&userBalance).Error
+	err = ub.data.DB(ctx).Where(&UserBalance{UserId: userId}).Table("user_balance_lock").First(&userBalance).Error
 	if err != nil {
 		return 0, err
 	}
@@ -2616,7 +2616,7 @@ func (ub *UserBalanceRepo) WithdrawNewRewardLevelRecommend(ctx context.Context, 
 	reward.BalanceRecordId = userBalanceRecode.ID
 	reward.Type = "withdraw" // 本次分红的行为类型
 	reward.TypeRecordId = locationId
-	reward.Reason = "withdraw_level_recommend" // 给我分红的理由
+	reward.Reason = "level_recommend" // 给我分红的理由
 	err = ub.data.DB(ctx).Table("reward").Create(&reward).Error
 	if err != nil {
 		return 0, err

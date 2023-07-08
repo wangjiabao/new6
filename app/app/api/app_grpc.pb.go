@@ -164,7 +164,7 @@ func (c *appClient) Deposit3(ctx context.Context, in *DepositRequest, opts ...gr
 
 func (c *appClient) VipCheck(ctx context.Context, in *VipCheckRequest, opts ...grpc.CallOption) (*VipCheckReply, error) {
 	out := new(VipCheckReply)
-	err := c.cc.Invoke(ctx, "/api.App/vipCheck", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/api.App/VipCheck", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -914,7 +914,7 @@ func _App_VipCheck_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.App/vipCheck",
+		FullMethod: "/api.App/VipCheck",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).VipCheck(ctx, req.(*VipCheckRequest))
@@ -1668,7 +1668,7 @@ var App_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _App_Deposit3_Handler,
 		},
 		{
-			MethodName: "vipCheck",
+			MethodName: "VipCheck",
 			Handler:    _App_VipCheck_Handler,
 		},
 		{

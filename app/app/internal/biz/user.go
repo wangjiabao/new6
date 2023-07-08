@@ -1594,7 +1594,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 	}
 
 	for _, withdraw := range tradeNotDeal {
-		if "" != withdraw.Status {
+		if "default" != withdraw.Status {
 			continue
 		}
 
@@ -1620,7 +1620,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 
 		// 推荐人
 		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, withdraw.UserId)
-		if nil != userRecommend {
+		if nil == userRecommend {
 			continue
 		}
 		if "" != userRecommend.RecommendCode {
@@ -2143,7 +2143,7 @@ func (uuc *UserUseCase) AdminDailyLocationRewardNew(ctx context.Context, req *v1
 
 	if nil != configs {
 		for _, vConfig := range configs {
-			if "locations_daily" == vConfig.KeyName {
+			if "locations_daily_rate" == vConfig.KeyName {
 				locationDailyRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			}
 		}

@@ -65,7 +65,7 @@ const OperationAppRecommendRewardList = "/api.App/RecommendRewardList"
 const OperationAppRewardList = "/api.App/RewardList"
 const OperationAppUserAuthList = "/api.App/UserAuthList"
 const OperationAppUserInfo = "/api.App/UserInfo"
-const OperationAppvipCheck = "/api.App/vipCheck"
+const OperationAppVipCheck = "/api.App/VipCheck"
 const OperationAppWithdraw = "/api.App/Withdraw"
 const OperationAppWithdrawList = "/api.App/WithdrawList"
 
@@ -354,7 +354,7 @@ func _App_VipCheck0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error
 		if err := ctx.BindQuery(&in); err != nil {
 			return err
 		}
-		http.SetOperation(ctx, OperationAppvipCheck)
+		http.SetOperation(ctx, OperationAppVipCheck)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.VipCheck(ctx, req.(*VipCheckRequest))
 		})
@@ -1806,7 +1806,7 @@ func (c *AppHTTPClientImpl) VipCheck(ctx context.Context, in *VipCheckRequest, o
 	var out VipCheckReply
 	pattern := "/api/admin_dhb/vip_check"
 	path := binding.EncodeURL(pattern, in, true)
-	opts = append(opts, http.Operation(OperationAppvipCheck))
+	opts = append(opts, http.Operation(OperationAppVipCheck))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

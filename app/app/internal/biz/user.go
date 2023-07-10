@@ -1567,9 +1567,9 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 	userWithdrawUsdtTotal, _ = uuc.ubRepo.GetUserWithdrawUsdtTotal(ctx)
 	userWithdrawDhbTotal, _ = uuc.ubRepo.GetUserWithdrawDhbTotal(ctx)
 	userRewardUsdtTotal, _ = uuc.ubRepo.GetUserRewardUsdtTotal(ctx)
-	systemRewardUsdtTotal, _ = uuc.ubRepo.GetSystemRewardUsdtTotal(ctx)
+	//systemRewardUsdtTotal, _ = uuc.ubRepo.GetSystemRewardUsdtTotal(ctx)
 	userLocationCount = uuc.locationRepo.GetLocationUserCount(ctx)
-	balanceRewardRewarded, _ = uuc.ubRepo.GetUserRewardBalanceRewardTotal(ctx)
+	//balanceRewardRewarded, _ = uuc.ubRepo.GetUserRewardBalanceRewardTotal(ctx)
 	balanceReward, _ = uuc.ubRepo.GetBalanceRewardTotal(ctx)
 
 	return &v1.AdminAllReply{

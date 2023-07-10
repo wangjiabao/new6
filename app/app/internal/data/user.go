@@ -2359,27 +2359,31 @@ func (ub *UserBalanceRepo) NormalRecommendTopReward(ctx context.Context, userId 
 // NewNormalRecommendReward .
 func (ub *UserBalanceRepo) NewNormalRecommendReward(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error) {
 	var err error
-	var location LocationNew
-	if err = ub.data.db.Table("location_new").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return 0, errors.NotFound("LOCATION_NOT_FOUND", "location not found")
-		}
-
-		return 0, errors.New(500, "LOCATION ERROR", err.Error())
-	}
-
-	res := ub.data.DB(ctx).Table("location_new").
-		Where("id=?", location.ID).
-		Updates(map[string]interface{}{"current_max_new": gorm.Expr("current_max_new + ?", amount)})
-	if 0 == res.RowsAffected || res.Error != nil {
-		return 0, res.Error
-	}
 
 	if len(tmpRecommendUserIdsInt) > 0 {
 		if err = ub.data.DB(ctx).Table("user_info").
 			Where("user_id in (?)", tmpRecommendUserIdsInt).
 			Updates(map[string]interface{}{"team_csd_balance": gorm.Expr("team_csd_balance + ?", amount)}).Error; nil != err {
 			return 0, errors.NotFound("user balance err", "user balance not found")
+		}
+	}
+
+	var location LocationNew
+	if err = ub.data.db.Table("location_new").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+
+		} else {
+			return 0, errors.New(500, "LOCATION ERROR", err.Error())
+		}
+
+	}
+
+	if 0 < location.ID {
+		res := ub.data.DB(ctx).Table("location_new").
+			Where("id=?", location.ID).
+			Updates(map[string]interface{}{"current_max_new": gorm.Expr("current_max_new + ?", amount)})
+		if 0 == res.RowsAffected || res.Error != nil {
+			return 0, res.Error
 		}
 	}
 
@@ -2486,17 +2490,19 @@ func (ub *UserBalanceRepo) WithdrawNewRewardTeamRecommend(ctx context.Context, u
 	var location LocationNew
 	if err = ub.data.db.Table("location_new").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return 0, errors.NotFound("LOCATION_NOT_FOUND", "location not found")
+		} else {
+			return 0, errors.New(500, "LOCATION ERROR", err.Error())
 		}
 
-		return 0, errors.New(500, "LOCATION ERROR", err.Error())
 	}
 
-	res := ub.data.DB(ctx).Table("location_new").
-		Where("id=?", location.ID).
-		Updates(map[string]interface{}{"current_max_new": gorm.Expr("current_max_new + ?", amount)})
-	if 0 == res.RowsAffected || res.Error != nil {
-		return 0, res.Error
+	if 0 < location.ID {
+		res := ub.data.DB(ctx).Table("location_new").
+			Where("id=?", location.ID).
+			Updates(map[string]interface{}{"current_max_new": gorm.Expr("current_max_new + ?", amount)})
+		if 0 == res.RowsAffected || res.Error != nil {
+			return 0, res.Error
+		}
 	}
 
 	if len(tmpRecommendUserIdsInt) > 0 {
@@ -2564,18 +2570,20 @@ func (ub *UserBalanceRepo) WithdrawNewRewardRecommend(ctx context.Context, userI
 		return 0, errors.New(500, "LOCATION ERROR", err.Error())
 	}
 
-	res := ub.data.DB(ctx).Table("location_new").
-		Where("id=?", location.ID).
-		Updates(map[string]interface{}{"current_max_new": gorm.Expr("current_max_new + ?", amount)})
-	if 0 == res.RowsAffected || res.Error != nil {
-		return 0, res.Error
+	if err = ub.data.db.Table("location_new").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+		} else {
+			return 0, errors.New(500, "LOCATION ERROR", err.Error())
+		}
+
 	}
 
-	if len(tmpRecommendUserIdsInt) > 0 {
-		if err = ub.data.DB(ctx).Table("user_info").
-			Where("user_id in (?)", tmpRecommendUserIdsInt).
-			Updates(map[string]interface{}{"team_csd_balance": gorm.Expr("team_csd_balance + ?", amount)}).Error; nil != err {
-			return 0, errors.NotFound("user balance err", "user balance not found")
+	if 0 < location.ID {
+		res := ub.data.DB(ctx).Table("location_new").
+			Where("id=?", location.ID).
+			Updates(map[string]interface{}{"current_max_new": gorm.Expr("current_max_new + ?", amount)})
+		if 0 == res.RowsAffected || res.Error != nil {
+			return 0, res.Error
 		}
 	}
 
@@ -2606,18 +2614,20 @@ func (ub *UserBalanceRepo) WithdrawNewRewardSecondRecommend(ctx context.Context,
 		return 0, errors.New(500, "LOCATION ERROR", err.Error())
 	}
 
-	res := ub.data.DB(ctx).Table("location_new").
-		Where("id=?", location.ID).
-		Updates(map[string]interface{}{"current_max_new": gorm.Expr("current_max_new + ?", amount)})
-	if 0 == res.RowsAffected || res.Error != nil {
-		return 0, res.Error
+	if err = ub.data.db.Table("location_new").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+		} else {
+			return 0, errors.New(500, "LOCATION ERROR", err.Error())
+		}
+
 	}
 
-	if len(tmpRecommendUserIdsInt) > 0 {
-		if err = ub.data.DB(ctx).Table("user_info").
-			Where("user_id in (?)", tmpRecommendUserIdsInt).
-			Updates(map[string]interface{}{"team_csd_balance": gorm.Expr("team_csd_balance + ?", amount)}).Error; nil != err {
-			return 0, errors.NotFound("user balance err", "user balance not found")
+	if 0 < location.ID {
+		res := ub.data.DB(ctx).Table("location_new").
+			Where("id=?", location.ID).
+			Updates(map[string]interface{}{"current_max_new": gorm.Expr("current_max_new + ?", amount)})
+		if 0 == res.RowsAffected || res.Error != nil {
+			return 0, res.Error
 		}
 	}
 
@@ -2648,18 +2658,20 @@ func (ub *UserBalanceRepo) WithdrawNewRewardLevelRecommend(ctx context.Context, 
 		return 0, errors.New(500, "LOCATION ERROR", err.Error())
 	}
 
-	res := ub.data.DB(ctx).Table("location_new").
-		Where("id=?", location.ID).
-		Updates(map[string]interface{}{"current_max_new": gorm.Expr("current_max_new + ?", amount)})
-	if 0 == res.RowsAffected || res.Error != nil {
-		return 0, res.Error
+	if err = ub.data.db.Table("location_new").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+		} else {
+			return 0, errors.New(500, "LOCATION ERROR", err.Error())
+		}
+
 	}
 
-	if len(tmpRecommendUserIdsInt) > 0 {
-		if err = ub.data.DB(ctx).Table("user_info").
-			Where("user_id in (?)", tmpRecommendUserIdsInt).
-			Updates(map[string]interface{}{"team_csd_balance": gorm.Expr("team_csd_balance + ?", amount)}).Error; nil != err {
-			return 0, errors.NotFound("user balance err", "user balance not found")
+	if 0 < location.ID {
+		res := ub.data.DB(ctx).Table("location_new").
+			Where("id=?", location.ID).
+			Updates(map[string]interface{}{"current_max_new": gorm.Expr("current_max_new + ?", amount)})
+		if 0 == res.RowsAffected || res.Error != nil {
+			return 0, res.Error
 		}
 	}
 

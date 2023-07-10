@@ -681,6 +681,34 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/record_list:
+        get:
+            tags:
+                - App
+            operationId: App_AdminRecordList
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/RecordListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/reward_list:
         get:
             tags:
@@ -1658,6 +1686,27 @@ components:
                 type:
                     type: string
                 reason:
+                    type: string
+        RecordListReply:
+            type: object
+            properties:
+                locations:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/RecordListReply_LocationList'
+                count:
+                    type: integer
+                    format: int64
+        RecordListReply_LocationList:
+            type: object
+            properties:
+                createdAt:
+                    type: string
+                address:
+                    type: string
+                amount:
+                    type: string
+                coinType:
                     type: string
         RewardListReply:
             type: object

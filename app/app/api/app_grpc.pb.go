@@ -40,6 +40,7 @@ type AppClient interface {
 	CheckAdminUserArea(ctx context.Context, in *CheckAdminUserAreaRequest, opts ...grpc.CallOption) (*CheckAdminUserAreaReply, error)
 	CheckAndInsertLocationsRecommendUser(ctx context.Context, in *CheckAndInsertLocationsRecommendUserRequest, opts ...grpc.CallOption) (*CheckAndInsertLocationsRecommendUserReply, error)
 	AdminLocationList(ctx context.Context, in *AdminLocationListRequest, opts ...grpc.CallOption) (*AdminLocationListReply, error)
+	AdminRecordList(ctx context.Context, in *RecordListRequest, opts ...grpc.CallOption) (*RecordListReply, error)
 	AdminLocationAllList(ctx context.Context, in *AdminLocationAllListRequest, opts ...grpc.CallOption) (*AdminLocationAllListReply, error)
 	AdminWithdrawList(ctx context.Context, in *AdminWithdrawListRequest, opts ...grpc.CallOption) (*AdminWithdrawListReply, error)
 	AdminWithdraw(ctx context.Context, in *AdminWithdrawRequest, opts ...grpc.CallOption) (*AdminWithdrawReply, error)
@@ -238,6 +239,15 @@ func (c *appClient) CheckAndInsertLocationsRecommendUser(ctx context.Context, in
 func (c *appClient) AdminLocationList(ctx context.Context, in *AdminLocationListRequest, opts ...grpc.CallOption) (*AdminLocationListReply, error) {
 	out := new(AdminLocationListReply)
 	err := c.cc.Invoke(ctx, "/api.App/AdminLocationList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appClient) AdminRecordList(ctx context.Context, in *RecordListRequest, opts ...grpc.CallOption) (*RecordListReply, error) {
+	out := new(RecordListReply)
+	err := c.cc.Invoke(ctx, "/api.App/AdminRecordList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -554,6 +564,7 @@ type AppServer interface {
 	CheckAdminUserArea(context.Context, *CheckAdminUserAreaRequest) (*CheckAdminUserAreaReply, error)
 	CheckAndInsertLocationsRecommendUser(context.Context, *CheckAndInsertLocationsRecommendUserRequest) (*CheckAndInsertLocationsRecommendUserReply, error)
 	AdminLocationList(context.Context, *AdminLocationListRequest) (*AdminLocationListReply, error)
+	AdminRecordList(context.Context, *RecordListRequest) (*RecordListReply, error)
 	AdminLocationAllList(context.Context, *AdminLocationAllListRequest) (*AdminLocationAllListReply, error)
 	AdminWithdrawList(context.Context, *AdminWithdrawListRequest) (*AdminWithdrawListReply, error)
 	AdminWithdraw(context.Context, *AdminWithdrawRequest) (*AdminWithdrawReply, error)
@@ -646,6 +657,9 @@ func (UnimplementedAppServer) CheckAndInsertLocationsRecommendUser(context.Conte
 }
 func (UnimplementedAppServer) AdminLocationList(context.Context, *AdminLocationListRequest) (*AdminLocationListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminLocationList not implemented")
+}
+func (UnimplementedAppServer) AdminRecordList(context.Context, *RecordListRequest) (*RecordListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminRecordList not implemented")
 }
 func (UnimplementedAppServer) AdminLocationAllList(context.Context, *AdminLocationAllListRequest) (*AdminLocationAllListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminLocationAllList not implemented")
@@ -1076,6 +1090,24 @@ func _App_AdminLocationList_Handler(srv interface{}, ctx context.Context, dec fu
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).AdminLocationList(ctx, req.(*AdminLocationListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _App_AdminRecordList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecordListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminRecordList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/AdminRecordList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminRecordList(ctx, req.(*RecordListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1734,6 +1766,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminLocationList",
 			Handler:    _App_AdminLocationList_Handler,
+		},
+		{
+			MethodName: "AdminRecordList",
+			Handler:    _App_AdminRecordList_Handler,
 		},
 		{
 			MethodName: "AdminLocationAllList",

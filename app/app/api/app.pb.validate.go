@@ -3460,6 +3460,248 @@ var _ interface {
 	ErrorName() string
 } = AdminUserListReplyValidationError{}
 
+// Validate checks the field values on RecordListRequest with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *RecordListRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on RecordListRequest with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// RecordListRequestMultiError, or nil if none found.
+func (m *RecordListRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RecordListRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Page
+
+	// no validation rules for Address
+
+	if len(errors) > 0 {
+		return RecordListRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// RecordListRequestMultiError is an error wrapping multiple validation errors
+// returned by RecordListRequest.ValidateAll() if the designated constraints
+// aren't met.
+type RecordListRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RecordListRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RecordListRequestMultiError) AllErrors() []error { return m }
+
+// RecordListRequestValidationError is the validation error returned by
+// RecordListRequest.Validate if the designated constraints aren't met.
+type RecordListRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RecordListRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RecordListRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RecordListRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RecordListRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RecordListRequestValidationError) ErrorName() string {
+	return "RecordListRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e RecordListRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRecordListRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RecordListRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RecordListRequestValidationError{}
+
+// Validate checks the field values on RecordListReply with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *RecordListReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on RecordListReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// RecordListReplyMultiError, or nil if none found.
+func (m *RecordListReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RecordListReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetLocations() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, RecordListReplyValidationError{
+						field:  fmt.Sprintf("Locations[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, RecordListReplyValidationError{
+						field:  fmt.Sprintf("Locations[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return RecordListReplyValidationError{
+					field:  fmt.Sprintf("Locations[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	// no validation rules for Count
+
+	if len(errors) > 0 {
+		return RecordListReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// RecordListReplyMultiError is an error wrapping multiple validation errors
+// returned by RecordListReply.ValidateAll() if the designated constraints
+// aren't met.
+type RecordListReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RecordListReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RecordListReplyMultiError) AllErrors() []error { return m }
+
+// RecordListReplyValidationError is the validation error returned by
+// RecordListReply.Validate if the designated constraints aren't met.
+type RecordListReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RecordListReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RecordListReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RecordListReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RecordListReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RecordListReplyValidationError) ErrorName() string { return "RecordListReplyValidationError" }
+
+// Error satisfies the builtin error interface
+func (e RecordListReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRecordListReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RecordListReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RecordListReplyValidationError{}
+
 // Validate checks the field values on AdminLocationListRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -11954,6 +12196,117 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = AdminUserListReply_UserListValidationError{}
+
+// Validate checks the field values on RecordListReply_LocationList with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *RecordListReply_LocationList) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on RecordListReply_LocationList with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// RecordListReply_LocationListMultiError, or nil if none found.
+func (m *RecordListReply_LocationList) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *RecordListReply_LocationList) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for CreatedAt
+
+	// no validation rules for Address
+
+	// no validation rules for Amount
+
+	// no validation rules for CoinType
+
+	if len(errors) > 0 {
+		return RecordListReply_LocationListMultiError(errors)
+	}
+
+	return nil
+}
+
+// RecordListReply_LocationListMultiError is an error wrapping multiple
+// validation errors returned by RecordListReply_LocationList.ValidateAll() if
+// the designated constraints aren't met.
+type RecordListReply_LocationListMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m RecordListReply_LocationListMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m RecordListReply_LocationListMultiError) AllErrors() []error { return m }
+
+// RecordListReply_LocationListValidationError is the validation error returned
+// by RecordListReply_LocationList.Validate if the designated constraints
+// aren't met.
+type RecordListReply_LocationListValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e RecordListReply_LocationListValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e RecordListReply_LocationListValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e RecordListReply_LocationListValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e RecordListReply_LocationListValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e RecordListReply_LocationListValidationError) ErrorName() string {
+	return "RecordListReply_LocationListValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e RecordListReply_LocationListValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sRecordListReply_LocationList.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = RecordListReply_LocationListValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = RecordListReply_LocationListValidationError{}
 
 // Validate checks the field values on AdminLocationListReply_LocationList with
 // the rules defined in the proto definition for this message. If any rules

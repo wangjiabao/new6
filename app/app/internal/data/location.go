@@ -767,6 +767,42 @@ func (lr *LocationRepo) GetLocations(ctx context.Context, b *biz.Pagination, use
 	return res, nil, count
 }
 
+// GetUserBalanceRecords .
+func (lr *LocationRepo) GetUserBalanceRecords(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.UserBalanceRecord, error, int64) {
+	var (
+		records []*UserBalanceRecord
+		count   int64
+	)
+	instance := lr.data.db.Table("user_balance_record").
+		Where("type = ? and (coin_type=? or coin_type=? or coin_type = ?)", "deposit", "USDT", "HBS", "CSD")
+
+	if 0 < userId {
+		instance = instance.Where("user_id=?", userId)
+	}
+
+	instance = instance.Count(&count)
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Order("id desc").Find(&records).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errors.NotFound("LOCATION_NOT_FOUND", "location not found"), 0
+		}
+
+		return nil, errors.New(500, "LOCATION ERROR", err.Error()), 0
+	}
+
+	res := make([]*biz.UserBalanceRecord, 0)
+	for _, v := range records {
+		res = append(res, &biz.UserBalanceRecord{
+			ID:        v.ID,
+			UserId:    v.UserId,
+			Amount:    v.Amount,
+			CoinType:  v.CoinType,
+			CreatedAt: v.CreatedAt,
+		})
+	}
+
+	return res, nil, count
+}
+
 // GetLocationsAll .
 func (lr *LocationRepo) GetLocationsAll(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.LocationNew, error, int64) {
 	var (

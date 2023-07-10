@@ -62,6 +62,14 @@ type UserRecommend struct {
 	CreatedAt     time.Time
 }
 
+type UserBalanceRecord struct {
+	ID        int64
+	UserId    int64
+	Amount    int64
+	CoinType  string
+	CreatedAt time.Time
+}
+
 type BalanceReward struct {
 	ID             int64
 	UserId         int64
@@ -563,6 +571,70 @@ func (uuc *UserUseCase) AdminAreaLevelUpdate(ctx context.Context, req *v1.AdminA
 	}
 
 	return res, nil
+}
+
+func (uuc *UserUseCase) AdminRecordList(ctx context.Context, req *v1.RecordListRequest) (*v1.RecordListReply, error) {
+	var (
+		locations  []*UserBalanceRecord
+		userSearch *User
+		userId     int64
+		userIds    []int64
+		userIdsMap map[int64]int64
+		users      map[int64]*User
+		count      int64
+		err        error
+	)
+
+	res := &v1.RecordListReply{
+		Locations: make([]*v1.RecordListReply_LocationList, 0),
+	}
+
+	// 地址查询
+	if "" != req.Address {
+		userSearch, err = uuc.repo.GetUserByAddress(ctx, req.Address)
+		if nil != err {
+			return res, nil
+		}
+		userId = userSearch.ID
+	}
+
+	locations, err, count = uuc.locationRepo.GetUserBalanceRecords(ctx, &Pagination{
+		PageNum:  int(req.Page),
+		PageSize: 10,
+	}, userId)
+	if nil != err {
+		return res, nil
+	}
+	res.Count = count
+
+	userIdsMap = make(map[int64]int64, 0)
+	for _, vLocations := range locations {
+		userIdsMap[vLocations.UserId] = vLocations.UserId
+	}
+	for _, v := range userIdsMap {
+		userIds = append(userIds, v)
+	}
+
+	users, err = uuc.repo.GetUserByUserIds(ctx, userIds...)
+	if nil != err {
+		return res, nil
+	}
+
+	for _, v := range locations {
+		if _, ok := users[v.UserId]; !ok {
+			continue
+		}
+
+		res.Locations = append(res.Locations, &v1.RecordListReply_LocationList{
+			CreatedAt: v.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
+			Address:   users[v.UserId].Address,
+			Amount:    fmt.Sprintf("%.2f", float64(v.Amount)/float64(10000000000)),
+			CoinType:  v.CoinType,
+		})
+	}
+
+	return res, nil
+
 }
 
 func (uuc *UserUseCase) AdminLocationList(ctx context.Context, req *v1.AdminLocationListRequest) (*v1.AdminLocationListReply, error) {

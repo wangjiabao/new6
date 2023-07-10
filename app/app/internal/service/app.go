@@ -583,7 +583,7 @@ func requestEthDepositResult(offset int64, page int64, contractAddress string) (
 	if err != nil {
 		return nil, err
 	}
-
+	fmt.Println(string(b))
 	var i struct {
 		Message string `json:"message"`
 		Result  []*eth `json:"Result"`

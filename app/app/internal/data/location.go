@@ -29,6 +29,7 @@ type LocationNew struct {
 	Status            string    `gorm:"type:varchar(45);not null"`
 	Current           int64     `gorm:"type:bigint;not null"`
 	CurrentMax        int64     `gorm:"type:bigint;not null"`
+	CurrentMaxNew     int64     `gorm:"type:bigint;not null"`
 	StopLocationAgain int64     `gorm:"type:int;not null"`
 	OutRate           int64     `gorm:"type:int;not null"`
 	StopCoin          int64     `gorm:"type:bigint;not null"`
@@ -356,11 +357,12 @@ func (lr *LocationRepo) GetAllLocationsNew(ctx context.Context) ([]*biz.Location
 
 	for _, location := range locations {
 		res = append(res, &biz.LocationNew{
-			ID:         location.ID,
-			UserId:     location.UserId,
-			Term:       location.Term,
-			Current:    location.Current,
-			CurrentMax: location.CurrentMax,
+			ID:            location.ID,
+			UserId:        location.UserId,
+			Term:          location.Term,
+			Current:       location.Current,
+			CurrentMax:    location.CurrentMax,
+			CurrentMaxNew: location.CurrentMaxNew,
 		})
 	}
 

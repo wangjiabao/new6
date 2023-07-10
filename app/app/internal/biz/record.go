@@ -40,6 +40,7 @@ type LocationNew struct {
 	Status            string
 	Current           int64
 	CurrentMax        int64
+	CurrentMaxNew     int64
 	StopLocationAgain int64
 	OutRate           int64
 	StopCoin          int64

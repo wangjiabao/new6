@@ -234,7 +234,7 @@ type UserBalanceRepo interface {
 	DepositLastNewDhb(ctx context.Context, userId int64, lastCoinAmount int64) error
 	UpdateBalanceRewardLastRewardDate(ctx context.Context, id int64) error
 	UpdateLocationAgain(ctx context.Context, locations []*LocationNew) error
-	LocationNewDailyReward(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
+	LocationNewDailyReward(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
 	WithdrawNewRewardRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
 	WithdrawNewRewardTeamRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
 	WithdrawNewRewardSecondRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
@@ -1577,6 +1577,27 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 		//	continue
 		//}
 
+		//withdraw.Amount*withdrawRate/100
+		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+			//currentValue -= withdraw.Amount * withdrawRate / 100 // 手续费
+			//currentValue -= withdraw.Amount * withdrawDestroyRate / 100
+			//fmt.Println(withdraw.Amount, currentValue)
+			// 手续费记录
+			//err = uuc.ubRepo.SystemFee(ctx, withdraw.Amount*withdrawRate/100, withdraw.ID)
+			//if nil != err {
+			//	return err
+			//}
+
+			_, err = uuc.ubRepo.UpdateTrade(ctx, withdraw.ID, "ok")
+			if nil != err {
+				return err
+			}
+
+			return nil
+		}); nil != err {
+			continue
+		}
+
 		var (
 			userRecommend       *UserRecommend
 			tmpRecommendUserIds []string
@@ -1610,8 +1631,16 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 			if nil == myUserTopRecommendUserInfo {
 				continue
 			}
-
+			//
 			rewardAmount := withdraw.AmountCsd * withdrawRate / 100
+
+			//tmpRecommendUserIdsInt := make([]int64, 0)
+			//if 1 < lastKey-i {
+			//	for _, v1 := range tmpRecommendUserIds[1 : lastKey-i] {
+			//		tmpRecommendUserIdsInt1, _ := strconv.ParseInt(v1, 10, 64)
+			//		tmpRecommendUserIdsInt = append(tmpRecommendUserIdsInt, tmpRecommendUserIdsInt1)
+			//	}
+			//}
 
 			if 0 == i { // 当前用户被此人直推
 
@@ -1706,27 +1735,6 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 			}); nil != err {
 				continue
 			}
-		}
-
-		//withdraw.Amount*withdrawRate/100
-		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-			//currentValue -= withdraw.Amount * withdrawRate / 100 // 手续费
-			//currentValue -= withdraw.Amount * withdrawDestroyRate / 100
-			//fmt.Println(withdraw.Amount, currentValue)
-			// 手续费记录
-			//err = uuc.ubRepo.SystemFee(ctx, withdraw.Amount*withdrawRate/100, withdraw.ID)
-			//if nil != err {
-			//	return err
-			//}
-
-			_, err = uuc.ubRepo.UpdateTrade(ctx, withdraw.ID, "ok")
-			if nil != err {
-				return err
-			}
-
-			return nil
-		}); nil != err {
-			continue
 		}
 	}
 
@@ -2119,13 +2127,39 @@ func (uuc *UserUseCase) AdminDailyLocationRewardNew(ctx context.Context, req *v1
 	}
 
 	for _, vUserLocations := range userLocations {
-		if vUserLocations.CurrentMax <= vUserLocations.Current {
+		if vUserLocations.CurrentMax+vUserLocations.CurrentMaxNew <= vUserLocations.Current {
 			continue
 		}
 
-		tmp := vUserLocations.CurrentMax * locationDailyRate / 1000
-		if tmp+vUserLocations.Current > vUserLocations.CurrentMax {
-			tmp = vUserLocations.CurrentMax - vUserLocations.Current
+		var userRecommend *UserRecommend
+		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, vUserLocations.UserId)
+		if nil == userRecommend {
+			continue
+		}
+
+		var (
+			tmpRecommendUserIds    []string
+			tmpRecommendUserIdsInt []int64
+		)
+		if "" != userRecommend.RecommendCode {
+			tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
+		}
+		lastKey := len(tmpRecommendUserIds) - 1
+		if 1 <= lastKey {
+			for i := 0; i <= lastKey; i++ {
+				// 有占位信息，推荐人推荐人的上一代
+				if lastKey-i <= 0 {
+					break
+				}
+
+				tmpMyTopUserRecommendUserId, _ := strconv.ParseInt(tmpRecommendUserIds[lastKey-i], 10, 64) // 最后一位是直推人
+				tmpRecommendUserIdsInt = append(tmpRecommendUserIdsInt, tmpMyTopUserRecommendUserId)
+			}
+		}
+
+		tmp := (vUserLocations.CurrentMax + vUserLocations.CurrentMaxNew) * locationDailyRate / 1000
+		if tmp+vUserLocations.Current > vUserLocations.CurrentMax+vUserLocations.CurrentMaxNew {
+			tmp = vUserLocations.CurrentMax + vUserLocations.CurrentMaxNew - vUserLocations.Current
 		}
 
 		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
@@ -2134,7 +2168,7 @@ func (uuc *UserUseCase) AdminDailyLocationRewardNew(ctx context.Context, req *v1
 				return err
 			}
 
-			_, err = uuc.ubRepo.LocationNewDailyReward(ctx, vUserLocations.UserId, tmp, vUserLocations.ID)
+			_, err = uuc.ubRepo.LocationNewDailyReward(ctx, vUserLocations.UserId, tmp, vUserLocations.ID, tmpRecommendUserIdsInt)
 			if nil != err {
 				return err
 			}

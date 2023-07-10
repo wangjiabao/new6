@@ -312,6 +312,7 @@ func (a *AppService) Deposit3(ctx context.Context, req *v1.DepositRequest) (*v1.
 		if nil != depositUsers {
 			existEthUserRecords, err = a.ruc.GetEthUserRecordByTxHash(ctx, hashKeys...)
 			// 统计开始
+			fmt.Println(11323213232)
 			notExistDepositResult = make([]*biz.EthUserRecord, 0)
 			for _, vDepositUsdtResult := range depositUsdtResult { // 主查usdt
 				if _, ok := existEthUserRecords[vDepositUsdtResult.Hash]; ok { // 记录已存在

@@ -206,8 +206,6 @@ func (a *AppService) Deposit4(ctx context.Context, req *v1.DepositRequest) (*v1.
 			// 统计开始
 			notExistDepositResult = make([]*biz.EthUserRecord, 0)
 			for _, vDepositUsdtResult := range depositUsdtResult { // 主查usdt
-
-				fmt.Println(vDepositUsdtResult, 222222)
 				if _, ok := existEthUserRecords[vDepositUsdtResult.Hash]; ok { // 记录已存在
 					continue
 				}
@@ -220,20 +218,16 @@ func (a *AppService) Deposit4(ctx context.Context, req *v1.DepositRequest) (*v1.
 					continue
 				}
 
-				fmt.Println(vDepositUsdtResult, 2223222)
 				// 去掉8个尾数0作为系统金额
 				tmpValue, _ := strconv.ParseInt(vDepositUsdtResult.Value[0:lenValue-8], 10, 64)
 				if 0 == tmpValue {
 					continue
 				}
 
-				fmt.Println(vDepositUsdtResult, 2223252)
 				//fmt.Println(vDepositUsdtResult.Value, tmpValue)
 				if int64(10000000000) > tmpValue { // 1000000000000
 					continue
 				}
-
-				fmt.Println(vDepositUsdtResult, 26623252)
 
 				notExistDepositResult = append(notExistDepositResult, &biz.EthUserRecord{ // 两种币的记录
 					UserId:    depositUsers[vDepositUsdtResult.From].ID,
@@ -312,9 +306,9 @@ func (a *AppService) Deposit3(ctx context.Context, req *v1.DepositRequest) (*v1.
 		if nil != depositUsers {
 			existEthUserRecords, err = a.ruc.GetEthUserRecordByTxHash(ctx, hashKeys...)
 			// 统计开始
-			fmt.Println(11323213232)
 			notExistDepositResult = make([]*biz.EthUserRecord, 0)
 			for _, vDepositUsdtResult := range depositUsdtResult { // 主查usdt
+				fmt.Println(vDepositUsdtResult)
 				if _, ok := existEthUserRecords[vDepositUsdtResult.Hash]; ok { // 记录已存在
 					continue
 				}

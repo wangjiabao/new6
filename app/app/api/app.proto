@@ -73,6 +73,12 @@ service App {
 		};
 	};
 
+	rpc Deposit4 (DepositRequest) returns (DepositReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/deposit_4"
+		};
+	};
+
 	rpc VipCheck (VipCheckRequest) returns (VipCheckReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/vip_check"

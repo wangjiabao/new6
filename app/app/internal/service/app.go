@@ -148,6 +148,107 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 	return &v1.DepositReply{}, nil
 }
 
+// Deposit4 deposit.
+func (a *AppService) Deposit4(ctx context.Context, req *v1.DepositRequest) (*v1.DepositReply, error) {
+
+	var (
+		depositUsdtResult     map[string]*eth
+		notExistDepositResult []*biz.EthUserRecord
+		existEthUserRecords   map[string]*biz.EthUserRecord
+		depositUsers          map[string]*biz.User
+		fromAccount           []string
+		hashKeys              []string
+		err                   error
+	)
+
+	end := time.Now().UTC().Add(20 * time.Second)
+
+	// 配置
+	//configs, err = a.uuc.GetDhbConfig(ctx)
+	//if nil != configs {
+	//	for _, vConfig := range configs {
+	//		if "level1Dhb" == vConfig.KeyName {
+	//			level1Dhb = vConfig.Value + "0000000000000000"
+	//		} else if "level2Dhb" == vConfig.KeyName {
+	//			level2Dhb = vConfig.Value + "0000000000000000"
+	//		} else if "level3Dhb" == vConfig.KeyName {
+	//			level3Dhb = vConfig.Value + "0000000000000000"
+	//		}
+	//	}
+	//}
+
+	for i := 1; i <= 5; i++ {
+		// 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd
+		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x0baefdb75ca6ca9a0d1685086829f3ea9dda9f5e")
+		if nil != err {
+			break
+		}
+
+		now := time.Now().UTC()
+		fmt.Println(now, end)
+		if end.Before(now) {
+			break
+		}
+
+		if 0 >= len(depositUsdtResult) {
+			break
+		}
+
+		for hashKey, vDepositResult := range depositUsdtResult { // 主查询
+			hashKeys = append(hashKeys, hashKey)
+			fromAccount = append(fromAccount, vDepositResult.From)
+		}
+
+		depositUsers, err = a.uuc.GetUserByAddress(ctx, fromAccount...)
+		if nil != depositUsers {
+			existEthUserRecords, err = a.ruc.GetEthUserRecordByTxHash(ctx, hashKeys...)
+			// 统计开始
+			notExistDepositResult = make([]*biz.EthUserRecord, 0)
+			for _, vDepositUsdtResult := range depositUsdtResult { // 主查usdt
+				if _, ok := existEthUserRecords[vDepositUsdtResult.Hash]; ok { // 记录已存在
+					continue
+				}
+				if _, ok := depositUsers[vDepositUsdtResult.From]; !ok { // 用户不存在
+					continue
+				}
+
+				lenValue := len(vDepositUsdtResult.Value)
+				if 18 > lenValue {
+					continue
+				}
+
+				// 去掉8个尾数0作为系统金额
+				tmpValue, _ := strconv.ParseInt(vDepositUsdtResult.Value[0:lenValue-8], 10, 64)
+				if 0 == tmpValue {
+					continue
+				}
+
+				//fmt.Println(vDepositUsdtResult.Value, tmpValue)
+				if int64(10000000000) > tmpValue { // 1000000000000
+					continue
+				}
+
+				notExistDepositResult = append(notExistDepositResult, &biz.EthUserRecord{ // 两种币的记录
+					UserId:    depositUsers[vDepositUsdtResult.From].ID,
+					Hash:      vDepositUsdtResult.Hash,
+					Status:    "success",
+					Type:      "deposit",
+					Amount:    strconv.FormatInt(tmpValue, 10) + "00000000",
+					RelAmount: tmpValue,
+					CoinType:  "CSD",
+				})
+			}
+
+			_, err = a.ruc.EthUserRecordHandle2(ctx, notExistDepositResult...)
+			if nil != err {
+				fmt.Println(err)
+			}
+		}
+	}
+
+	return &v1.DepositReply{}, nil
+}
+
 // Deposit3 deposit.
 func (a *AppService) Deposit3(ctx context.Context, req *v1.DepositRequest) (*v1.DepositReply, error) {
 

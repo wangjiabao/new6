@@ -11976,10 +11976,6 @@ func (m *AdminLocationListReply_LocationList) validate(all bool) error {
 
 	// no validation rules for Address
 
-	// no validation rules for Row
-
-	// no validation rules for Col
-
 	// no validation rules for Status
 
 	// no validation rules for CurrentLevel
@@ -12097,10 +12093,6 @@ func (m *AdminLocationAllListReply_LocationList) validate(all bool) error {
 	// no validation rules for CreatedAt
 
 	// no validation rules for Address
-
-	// no validation rules for Row
-
-	// no validation rules for Col
 
 	// no validation rules for Status
 

@@ -31,6 +31,7 @@ type AppClient interface {
 	Withdraw(ctx context.Context, in *WithdrawRequest, opts ...grpc.CallOption) (*WithdrawReply, error)
 	Deposit(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
 	Deposit3(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
+	Deposit4(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
 	VipCheck(ctx context.Context, in *VipCheckRequest, opts ...grpc.CallOption) (*VipCheckReply, error)
 	Deposit2(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
 	AdminRewardList(ctx context.Context, in *AdminRewardListRequest, opts ...grpc.CallOption) (*AdminRewardListReply, error)
@@ -156,6 +157,15 @@ func (c *appClient) Deposit(ctx context.Context, in *DepositRequest, opts ...grp
 func (c *appClient) Deposit3(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error) {
 	out := new(DepositReply)
 	err := c.cc.Invoke(ctx, "/api.App/Deposit3", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appClient) Deposit4(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error) {
+	out := new(DepositReply)
+	err := c.cc.Invoke(ctx, "/api.App/Deposit4", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -535,6 +545,7 @@ type AppServer interface {
 	Withdraw(context.Context, *WithdrawRequest) (*WithdrawReply, error)
 	Deposit(context.Context, *DepositRequest) (*DepositReply, error)
 	Deposit3(context.Context, *DepositRequest) (*DepositReply, error)
+	Deposit4(context.Context, *DepositRequest) (*DepositReply, error)
 	VipCheck(context.Context, *VipCheckRequest) (*VipCheckReply, error)
 	Deposit2(context.Context, *DepositRequest) (*DepositReply, error)
 	AdminRewardList(context.Context, *AdminRewardListRequest) (*AdminRewardListReply, error)
@@ -608,6 +619,9 @@ func (UnimplementedAppServer) Deposit(context.Context, *DepositRequest) (*Deposi
 }
 func (UnimplementedAppServer) Deposit3(context.Context, *DepositRequest) (*DepositReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Deposit3 not implemented")
+}
+func (UnimplementedAppServer) Deposit4(context.Context, *DepositRequest) (*DepositReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Deposit4 not implemented")
 }
 func (UnimplementedAppServer) VipCheck(context.Context, *VipCheckRequest) (*VipCheckReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method VipCheck not implemented")
@@ -900,6 +914,24 @@ func _App_Deposit3_Handler(srv interface{}, ctx context.Context, dec func(interf
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).Deposit3(ctx, req.(*DepositRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _App_Deposit4_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DepositRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).Deposit4(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/Deposit4",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).Deposit4(ctx, req.(*DepositRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1666,6 +1698,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Deposit3",
 			Handler:    _App_Deposit3_Handler,
+		},
+		{
+			MethodName: "Deposit4",
+			Handler:    _App_Deposit4_Handler,
 		},
 		{
 			MethodName: "VipCheck",

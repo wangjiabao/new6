@@ -1300,6 +1300,20 @@ func (ub *UserBalanceRepo) DepositLastNewDhb(ctx context.Context, userId int64, 
 	return nil
 }
 
+// DepositLastNewCsd .
+func (ub *UserBalanceRepo) DepositLastNewCsd(ctx context.Context, userId int64, lastCoinAmount int64) error {
+	var (
+		err error
+	)
+	if err = ub.data.DB(ctx).Table("user_balance_lock").
+		Where("user_id=?", userId).
+		Updates(map[string]interface{}{"balance_usdt": gorm.Expr("balance_usdt + ?", lastCoinAmount)}).Error; nil != err {
+		return errors.NotFound("user balance err", "user balance not found")
+	}
+
+	return nil
+}
+
 // UserDailyLocationReward .
 func (ub *UserBalanceRepo) UserDailyLocationReward(ctx context.Context, userId int64, rewardAmount int64, amount int64, coinAmount int64, status string, locationId int64) (int64, error) {
 	var err error

@@ -653,9 +653,16 @@ func (ruc *RecordUseCase) EthUserRecordHandle2(ctx context.Context, ethUserRecor
 			//		stopUsdt += tmpCurrentAmount * rewardRate / 100 // 记录下一次
 			//		stopCoin += tmpCurrentAmount * coinRewardRate / 100 * 1000 / coinPrice
 			//
-			err = ruc.userBalanceRepo.DepositLastNewDhb(ctx, v.UserId, v.RelAmount) // 充值
-			if nil != err {
-				return err
+			if "CSD" == v.CoinType {
+				err = ruc.userBalanceRepo.DepositLastNewCsd(ctx, v.UserId, v.RelAmount) // 充值
+				if nil != err {
+					return err
+				}
+			} else {
+				err = ruc.userBalanceRepo.DepositLastNewDhb(ctx, v.UserId, v.RelAmount) // 充值
+				if nil != err {
+					return err
+				}
 			}
 			//	}
 			//}

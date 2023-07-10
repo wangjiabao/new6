@@ -57,6 +57,7 @@ const OperationAppCheckAndInsertRecommendArea = "/api.App/CheckAndInsertRecommen
 const OperationAppDeposit = "/api.App/Deposit"
 const OperationAppDeposit2 = "/api.App/Deposit2"
 const OperationAppDeposit3 = "/api.App/Deposit3"
+const OperationAppDeposit4 = "/api.App/Deposit4"
 const OperationAppFeeRewardList = "/api.App/FeeRewardList"
 const OperationAppLockSystem = "/api.App/LockSystem"
 const OperationAppMyAuthList = "/api.App/MyAuthList"
@@ -108,6 +109,7 @@ type AppHTTPServer interface {
 	Deposit(context.Context, *DepositRequest) (*DepositReply, error)
 	Deposit2(context.Context, *DepositRequest) (*DepositReply, error)
 	Deposit3(context.Context, *DepositRequest) (*DepositReply, error)
+	Deposit4(context.Context, *DepositRequest) (*DepositReply, error)
 	FeeRewardList(context.Context, *FeeRewardListRequest) (*FeeRewardListReply, error)
 	LockSystem(context.Context, *LockSystemRequest) (*LockSystemReply, error)
 	MyAuthList(context.Context, *MyAuthListRequest) (*MyAuthListReply, error)
@@ -132,6 +134,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.POST("/api/app_server/withdraw", _App_Withdraw0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit", _App_Deposit0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit_3", _App_Deposit30_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/deposit_4", _App_Deposit40_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/vip_check", _App_VipCheck0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit_2", _App_Deposit20_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/reward_list", _App_AdminRewardList0_HTTP_Handler(srv))
@@ -338,6 +341,25 @@ func _App_Deposit30_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error
 		http.SetOperation(ctx, OperationAppDeposit3)
 		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
 			return srv.Deposit3(ctx, req.(*DepositRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*DepositReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _App_Deposit40_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in DepositRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppDeposit4)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.Deposit4(ctx, req.(*DepositRequest))
 		})
 		out, err := h(ctx, &in)
 		if err != nil {
@@ -1183,6 +1205,7 @@ type AppHTTPClient interface {
 	Deposit(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	Deposit2(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	Deposit3(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
+	Deposit4(ctx context.Context, req *DepositRequest, opts ...http.CallOption) (rsp *DepositReply, err error)
 	FeeRewardList(ctx context.Context, req *FeeRewardListRequest, opts ...http.CallOption) (rsp *FeeRewardListReply, err error)
 	LockSystem(ctx context.Context, req *LockSystemRequest, opts ...http.CallOption) (rsp *LockSystemReply, err error)
 	MyAuthList(ctx context.Context, req *MyAuthListRequest, opts ...http.CallOption) (rsp *MyAuthListReply, err error)
@@ -1690,6 +1713,19 @@ func (c *AppHTTPClientImpl) Deposit3(ctx context.Context, in *DepositRequest, op
 	pattern := "/api/admin_dhb/deposit_3"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAppDeposit3))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) Deposit4(ctx context.Context, in *DepositRequest, opts ...http.CallOption) (*DepositReply, error) {
+	var out DepositReply
+	pattern := "/api/admin_dhb/deposit_4"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppDeposit4))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

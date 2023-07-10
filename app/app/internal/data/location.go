@@ -83,7 +83,7 @@ func (lr *LocationRepo) CreateLocation(ctx context.Context, rel *biz.Location) (
 }
 
 // CreateLocationNew .
-func (lr *LocationRepo) CreateLocationNew(ctx context.Context, rel *biz.LocationNew, amount int64) (*biz.LocationNew, error) {
+func (lr *LocationRepo) CreateLocationNew(ctx context.Context, rel *biz.LocationNew, amount int64, tmpRecommendUserIdsInt []int64) (*biz.LocationNew, error) {
 	var location LocationNew
 	location.Status = rel.Status
 	location.Term = rel.Term
@@ -95,6 +95,15 @@ func (lr *LocationRepo) CreateLocationNew(ctx context.Context, rel *biz.Location
 	res := lr.data.DB(ctx).Table("location_new").Create(&location)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")
+	}
+
+	var err error
+	if len(tmpRecommendUserIdsInt) > 0 {
+		if err = lr.data.DB(ctx).Table("user_info").
+			Where("user_id in (?)", tmpRecommendUserIdsInt).
+			Updates(map[string]interface{}{"team_csd_balance": gorm.Expr("team_csd_balance + ?", rel.CurrentMax)}).Error; nil != err {
+			return nil, errors.NotFound("user balance err", "user balance not found")
+		}
 	}
 
 	var userBalanceRecode UserBalanceRecord

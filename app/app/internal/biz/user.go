@@ -182,7 +182,7 @@ type UserBalanceRepo interface {
 	RecommendWithdrawReward(ctx context.Context, userId int64, amount int64, locationId int64, status string) (int64, error)
 	RecommendWithdrawTopReward(ctx context.Context, userId int64, amount int64, locationId int64, vip int64, status string) (int64, error)
 	NormalRecommendReward(ctx context.Context, userId int64, rewardAmount int64, amount int64, amountDhb int64, locationId int64, status string) (int64, error)
-	NewNormalRecommendReward(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
+	NewNormalRecommendReward(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
 	NormalRecommendTopReward(ctx context.Context, userId int64, amount int64, locationId int64, reasonId int64, status string) (int64, error)
 	NormalWithdrawRecommendReward(ctx context.Context, userId int64, amount int64, locationId int64, status string) (int64, error)
 	NormalWithdrawRecommendTopReward(ctx context.Context, userId int64, amount int64, locationId int64, reasonId int64, status string) (int64, error)
@@ -235,11 +235,11 @@ type UserBalanceRepo interface {
 	DepositLastNewCsd(ctx context.Context, userId int64, lastCoinAmount int64) error
 	UpdateBalanceRewardLastRewardDate(ctx context.Context, id int64) error
 	UpdateLocationAgain(ctx context.Context, locations []*LocationNew) error
-	LocationNewDailyReward(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
-	WithdrawNewRewardRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
-	WithdrawNewRewardTeamRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
-	WithdrawNewRewardSecondRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
-	WithdrawNewRewardLevelRecommend(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
+	LocationNewDailyReward(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
+	WithdrawNewRewardRecommend(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
+	WithdrawNewRewardTeamRecommend(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
+	WithdrawNewRewardSecondRecommend(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
+	WithdrawNewRewardLevelRecommend(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
 }
 
 type UserRecommendRepo interface {
@@ -1634,19 +1634,18 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 			}
 			//
 			rewardAmount := withdraw.AmountCsd * withdrawRate / 100
-
-			//tmpRecommendUserIdsInt := make([]int64, 0)
-			//if 1 < lastKey-i {
-			//	for _, v1 := range tmpRecommendUserIds[1 : lastKey-i] {
-			//		tmpRecommendUserIdsInt1, _ := strconv.ParseInt(v1, 10, 64)
-			//		tmpRecommendUserIdsInt = append(tmpRecommendUserIdsInt, tmpRecommendUserIdsInt1)
-			//	}
-			//}
+			tmpRecommendUserIdsInt := make([]int64, 0)
+			if 1 < lastKey-i {
+				for _, v1 := range tmpRecommendUserIds[1 : lastKey-i] {
+					tmpRecommendUserIdsInt1, _ := strconv.ParseInt(v1, 10, 64)
+					tmpRecommendUserIdsInt = append(tmpRecommendUserIdsInt, tmpRecommendUserIdsInt1)
+				}
+			}
 
 			if 0 == i { // 当前用户被此人直推
 
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					_, err = uuc.ubRepo.WithdrawNewRewardRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendRate/100, withdraw.ID)
+					_, err = uuc.ubRepo.WithdrawNewRewardRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendRate/100, withdraw.ID, tmpRecommendUserIdsInt)
 					if nil != err {
 						return err
 					}
@@ -1659,7 +1658,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 				continue
 			} else if 1 == i { // 间接推
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					_, err = uuc.ubRepo.WithdrawNewRewardSecondRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendSecondRate/100, withdraw.ID)
+					_, err = uuc.ubRepo.WithdrawNewRewardSecondRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendSecondRate/100, withdraw.ID, tmpRecommendUserIdsInt)
 					if nil != err {
 						return err
 					}
@@ -1686,7 +1685,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 				lastVip = myUserTopRecommendUserInfo.Vip
 				levelRewardCount--
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, withdraw.ID)
+					_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, withdraw.ID, tmpRecommendUserIdsInt)
 					if nil != err {
 						return err
 					}
@@ -1727,7 +1726,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 					withdrawTeamVip = withdrawTeamVipFifthRate
 				}
 
-				_, err = uuc.ubRepo.WithdrawNewRewardTeamRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*tmp/100, withdraw.ID)
+				_, err = uuc.ubRepo.WithdrawNewRewardTeamRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*tmp/100, withdraw.ID, tmpRecommendUserIdsInt)
 				if nil != err {
 					return err
 				}
@@ -2138,26 +2137,6 @@ func (uuc *UserUseCase) AdminDailyLocationRewardNew(ctx context.Context, req *v1
 			continue
 		}
 
-		var (
-			tmpRecommendUserIds    []string
-			tmpRecommendUserIdsInt []int64
-		)
-		if "" != userRecommend.RecommendCode {
-			tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
-		}
-		lastKey := len(tmpRecommendUserIds) - 1
-		if 1 <= lastKey {
-			for i := 0; i <= lastKey; i++ {
-				// 有占位信息，推荐人推荐人的上一代
-				if lastKey-i <= 0 {
-					break
-				}
-
-				tmpMyTopUserRecommendUserId, _ := strconv.ParseInt(tmpRecommendUserIds[lastKey-i], 10, 64) // 最后一位是直推人
-				tmpRecommendUserIdsInt = append(tmpRecommendUserIdsInt, tmpMyTopUserRecommendUserId)
-			}
-		}
-
 		tmp := (vUserLocations.CurrentMax + vUserLocations.CurrentMaxNew) * locationDailyRate / 1000
 		if tmp+vUserLocations.Current > vUserLocations.CurrentMax+vUserLocations.CurrentMaxNew {
 			tmp = vUserLocations.CurrentMax + vUserLocations.CurrentMaxNew - vUserLocations.Current
@@ -2169,7 +2148,7 @@ func (uuc *UserUseCase) AdminDailyLocationRewardNew(ctx context.Context, req *v1
 				return err
 			}
 
-			_, err = uuc.ubRepo.LocationNewDailyReward(ctx, vUserLocations.UserId, tmp, vUserLocations.ID, tmpRecommendUserIdsInt)
+			_, err = uuc.ubRepo.LocationNewDailyReward(ctx, vUserLocations.UserId, tmp, vUserLocations.ID)
 			if nil != err {
 				return err
 			}

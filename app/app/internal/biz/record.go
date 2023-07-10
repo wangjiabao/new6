@@ -96,7 +96,7 @@ type LocationRepo interface {
 	GetAllLocationsNew(ctx context.Context) ([]*LocationNew, error)
 	GetLocationsByUserIds(ctx context.Context, userIds []int64) ([]*Location, error)
 
-	CreateLocationNew(ctx context.Context, rel *LocationNew, amount int64) (*LocationNew, error)
+	CreateLocationNew(ctx context.Context, rel *LocationNew, amount int64, tmpRecommendUserIdsInt []int64) (*LocationNew, error)
 	GetMyStopLocationsLast(ctx context.Context, userId int64) ([]*LocationNew, error)
 	GetLocationsNewByUserId(ctx context.Context, userId int64) ([]*LocationNew, error)
 	UpdateLocationNew(ctx context.Context, id int64, status string, current int64, stopDate time.Time) error
@@ -226,12 +226,29 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 		if nil != err {
 			continue
 		}
+		var (
+			tmpRecommendUserIdsInt []int64
+		)
 		if "" != userRecommend.RecommendCode {
 			tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
 			if 2 <= len(tmpRecommendUserIds) {
 				myUserRecommendUserId, _ = strconv.ParseInt(tmpRecommendUserIds[len(tmpRecommendUserIds)-1], 10, 64) // 最后一位是直推人
 			}
+
+			lastKey := len(tmpRecommendUserIds) - 1
+			if 1 <= lastKey {
+				for i := 0; i <= lastKey; i++ {
+					// 有占位信息，推荐人推荐人的上一代
+					if lastKey-i <= 0 {
+						break
+					}
+
+					tmpMyTopUserRecommendUserId, _ := strconv.ParseInt(tmpRecommendUserIds[lastKey-i], 10, 64) // 最后一位是直推人
+					tmpRecommendUserIdsInt = append(tmpRecommendUserIdsInt, tmpMyTopUserRecommendUserId)
+				}
+			}
 		}
+
 		if 0 < myUserRecommendUserId {
 			myUserRecommendUserInfo, err = ruc.userInfoRepo.GetUserInfoByUserId(ctx, myUserRecommendUserId)
 		}
@@ -265,7 +282,7 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 				Current:    locationCurrent,
 				CurrentMax: locationCurrentMax,
 				StopDate:   tmpStopDate,
-			}, v.RelAmount)
+			}, v.RelAmount, tmpRecommendUserIdsInt)
 			if nil != err {
 				return err
 			}
@@ -338,7 +355,12 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 				//
 				//	}
 
-				_, err = ruc.userBalanceRepo.NewNormalRecommendReward(ctx, myUserRecommendUserId, locationCurrentMax*recommendRate/1000, currentLocationNew.ID) // 直推人奖励
+				var tmp2 []int64
+				if 1 < len(tmpRecommendUserIdsInt) {
+					tmp2 = tmpRecommendUserIdsInt[1 : len(tmpRecommendUserIdsInt)-1]
+				}
+
+				_, err = ruc.userBalanceRepo.NewNormalRecommendReward(ctx, myUserRecommendUserId, locationCurrentMax*recommendRate/1000, currentLocationNew.ID, tmp2) // 直推人奖励
 				if nil != err {
 					return err
 				}

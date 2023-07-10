@@ -282,6 +282,7 @@ func (a *AppService) Deposit3(ctx context.Context, req *v1.DepositRequest) (*v1.
 		// 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd
 		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x0905397af05dd0bdf76690ff318b10c6216e3069")
 		if nil != err {
+			fmt.Println("11111111211", depositUsdtResult, err)
 			break
 		}
 
@@ -339,6 +340,8 @@ func (a *AppService) Deposit3(ctx context.Context, req *v1.DepositRequest) (*v1.
 					CoinType:  "HBS",
 				})
 			}
+
+			fmt.Println("1111111111", notExistDepositResult)
 
 			_, err = a.ruc.EthUserRecordHandle2(ctx, notExistDepositResult...)
 			if nil != err {

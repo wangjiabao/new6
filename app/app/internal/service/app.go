@@ -308,7 +308,6 @@ func (a *AppService) Deposit3(ctx context.Context, req *v1.DepositRequest) (*v1.
 			// 统计开始
 			notExistDepositResult = make([]*biz.EthUserRecord, 0)
 			for _, vDepositUsdtResult := range depositUsdtResult { // 主查usdt
-				fmt.Println(vDepositUsdtResult)
 				if _, ok := existEthUserRecords[vDepositUsdtResult.Hash]; ok { // 记录已存在
 					continue
 				}

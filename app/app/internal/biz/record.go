@@ -3,7 +3,6 @@ package biz
 import (
 	"context"
 	v1 "dhb/app/app/api"
-	"fmt"
 	"github.com/go-kratos/kratos/v2/log"
 	"strconv"
 	"strings"
@@ -443,15 +442,14 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 func (ruc *RecordUseCase) EthUserRecordHandle2(ctx context.Context, ethUserRecord ...*EthUserRecord) (bool, error) {
 
 	var (
-		//configs       []*Config
-		term int64
-		//level1Price   int64
-		//level2Price   int64
-		//level3Price   int64
-		//level4Price   int64
-		//csdPrice      int64
-		//vip1          bool
-		//recommendRate int64
+	//configs       []*Confi
+	//level1Price   int64
+	//level2Price   int64
+	//level3Price   int64
+	//level4Price   int64
+	//csdPrice      int64
+	//vip1          bool
+	//recommendRate int64
 	)
 	// 配置
 	//configs, _ = ruc.configRepo.GetConfigByKeys(ctx,
@@ -478,12 +476,7 @@ func (ruc *RecordUseCase) EthUserRecordHandle2(ctx context.Context, ethUserRecor
 	//	}
 	//}
 
-	if term < 1 || term > 4 {
-		return true, nil
-	}
-
 	for _, v := range ethUserRecord {
-		fmt.Println(v)
 		var (
 			err error
 		)

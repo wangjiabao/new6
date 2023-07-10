@@ -180,7 +180,7 @@ func (a *AppService) Deposit4(ctx context.Context, req *v1.DepositRequest) (*v1.
 
 	for i := 1; i <= 5; i++ {
 		// 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd
-		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x0baefdb75ca6ca9a0d1685086829f3ea9dda9f5e")
+		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x538ac017aa01ba9665052660ea5783ba91a48092")
 		if nil != err {
 			break
 		}

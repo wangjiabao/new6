@@ -212,13 +212,13 @@ func (ruc *RecordUseCase) EthUserRecordHandle(ctx context.Context, ethUserRecord
 		}
 
 		if v.RelAmount >= level1Price*10000000000 && v.RelAmount < level2Price*10000000000 {
-			locationCurrentMax = level1Price * 10000000000 * csdPrice / 1000
+			locationCurrentMax = level1Price * 10000000 * csdPrice
 		} else if v.RelAmount >= level2Price*10000000000 && v.RelAmount < level3Price*10000000000 {
-			locationCurrentMax = level2Price * 10000000000 * csdPrice / 1000
+			locationCurrentMax = level2Price * 10000000 * csdPrice
 		} else if v.RelAmount >= level3Price*10000000000 && v.RelAmount < level4Price*10000000000 {
-			locationCurrentMax = level3Price * 10000000000 * csdPrice / 1000
+			locationCurrentMax = level3Price * 10000000 * csdPrice
 		} else if v.RelAmount >= level4Price*10000000000 {
-			locationCurrentMax = level4Price * 10000000000 * csdPrice / 1000
+			locationCurrentMax = level4Price * 10000000 * csdPrice
 			vip1 = true
 		}
 

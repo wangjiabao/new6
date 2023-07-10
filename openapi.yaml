@@ -1151,6 +1151,12 @@ components:
                     type: string
                 allWithdraw:
                     type: string
+                totalH:
+                    type: string
+                allBalanceH:
+                    type: string
+                todayWithdrawH:
+                    type: string
                 allWithdrawBtc:
                     type: string
                 todayWithdrawBtc:

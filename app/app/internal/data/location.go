@@ -29,6 +29,7 @@ type LocationNew struct {
 	Status            string    `gorm:"type:varchar(45);not null"`
 	Current           int64     `gorm:"type:bigint;not null"`
 	CurrentMax        int64     `gorm:"type:bigint;not null"`
+	Usdt              int64     `gorm:"type:bigint;not null"`
 	CurrentMaxNew     int64     `gorm:"type:bigint;not null"`
 	StopLocationAgain int64     `gorm:"type:int;not null"`
 	OutRate           int64     `gorm:"type:int;not null"`
@@ -92,6 +93,7 @@ func (lr *LocationRepo) CreateLocationNew(ctx context.Context, rel *biz.Location
 	location.UserId = rel.UserId
 	location.OutRate = rel.OutRate
 	location.StopDate = rel.StopDate
+	location.Usdt = amount
 	res := lr.data.DB(ctx).Table("location_new").Create(&location)
 	if res.Error != nil {
 		return nil, errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")

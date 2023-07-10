@@ -5584,6 +5584,12 @@ func (m *AdminAllReply) validate(all bool) error {
 
 	// no validation rules for AllWithdraw
 
+	// no validation rules for TotalH
+
+	// no validation rules for AllBalanceH
+
+	// no validation rules for TodayWithdrawH
+
 	// no validation rules for AllWithdrawBtc
 
 	// no validation rules for TodayWithdrawBtc

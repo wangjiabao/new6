@@ -3128,6 +3128,23 @@ func (ub UserBalanceRepo) GetUserBalanceRecordUsdtTotal(ctx context.Context) (in
 	return total.Total, nil
 }
 
+// GetUserBalanceRecordHbsTotal .
+func (ub UserBalanceRepo) GetUserBalanceRecordHbsTotal(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Table("user_balance_record").
+		Where("type=?", "deposit").
+		Where("coin_type=?", "HBS").
+		Select("sum(amount) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_RECORD_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE RECORD ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
 // GetUserBalanceRecordUsdtTotalToday .
 func (ub UserBalanceRepo) GetUserBalanceRecordUsdtTotalToday(ctx context.Context) (int64, error) {
 	var total UserBalanceTotal

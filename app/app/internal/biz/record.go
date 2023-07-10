@@ -21,16 +21,17 @@ type EthUserRecord struct {
 }
 
 type Location struct {
-	ID           int64
-	UserId       int64
-	Status       string
-	CurrentLevel int64
-	Current      int64
-	CurrentMax   int64
-	Row          int64
-	Col          int64
-	StopDate     time.Time
-	CreatedAt    time.Time
+	ID            int64
+	UserId        int64
+	Status        string
+	CurrentLevel  int64
+	Current       int64
+	CurrentMax    int64
+	CurrentMaxNew int64
+	Row           int64
+	Col           int64
+	StopDate      time.Time
+	CreatedAt     time.Time
 }
 
 type LocationNew struct {

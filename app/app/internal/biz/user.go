@@ -487,10 +487,25 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 	for _, v := range users {
 		// 伞下业绩
 		var (
-			userRecommend      *UserRecommend
-			myRecommendUsers   []*UserRecommend
-			myRecommendUserIds []int64
+			userRecommend           *UserRecommend
+			myRecommendUsers        []*UserRecommend
+			myRecommendUserIds      []int64
+			locations               []*Location
+			tmpCurrentMaxSubCurrent int64
 		)
+		locations, err = uuc.locationRepo.GetLocationsByUserId(ctx, v.ID)
+		if nil != locations && 0 < len(locations) {
+			for _, vLocation := range locations {
+				//if term == v.Term {
+				//	if v.CurrentMax >= v.Current {
+				//		tmpCurrentMaxSubCurrent += v.CurrentMax - v.Current
+				//	}
+				//}
+				if vLocation.CurrentMax+vLocation.CurrentMaxNew >= vLocation.Current {
+					tmpCurrentMaxSubCurrent += vLocation.CurrentMax + vLocation.CurrentMaxNew - vLocation.Current
+				}
+			}
+		}
 
 		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, v.ID)
 		if nil != err {
@@ -521,7 +536,7 @@ func (uuc *UserUseCase) AdminUserList(ctx context.Context, req *v1.AdminUserList
 			Address:          v.Address,
 			BalanceUsdt:      fmt.Sprintf("%.2f", float64(userBalances[v.ID].BalanceUsdt)/float64(10000000000)),
 			BalanceDhb:       fmt.Sprintf("%.2f", float64(userBalances[v.ID].BalanceDhb)/float64(10000000000)),
-			BalanceUsdtLock:  fmt.Sprintf("%.2f", float64(userBalancesLock[v.ID].BalanceUsdt)/float64(10000000000)),
+			BalanceUsdtLock:  fmt.Sprintf("%.2f", float64(tmpCurrentMaxSubCurrent)/float64(10000000000)),
 			BalanceDhbLock:   fmt.Sprintf("%.2f", float64(userBalancesLock[v.ID].BalanceDhb)/float64(10000000000)),
 			Vip:              userInfos[v.ID].Vip,
 			HistoryRecommend: userInfos[v.ID].HistoryRecommend,

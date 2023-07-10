@@ -10,17 +10,18 @@ import (
 )
 
 type Location struct {
-	ID           int64     `gorm:"primarykey;type:int"`
-	UserId       int64     `gorm:"type:int;not null"`
-	Row          int64     `gorm:"type:int;not null"`
-	Col          int64     `gorm:"type:int;not null"`
-	Status       string    `gorm:"type:varchar(45);not null"`
-	CurrentLevel int64     `gorm:"type:int;not null"`
-	Current      int64     `gorm:"type:bigint;not null"`
-	CurrentMax   int64     `gorm:"type:bigint;not null"`
-	StopDate     time.Time `gorm:"type:datetime;not null"`
-	CreatedAt    time.Time `gorm:"type:datetime;not null"`
-	UpdatedAt    time.Time `gorm:"type:datetime;not null"`
+	ID            int64     `gorm:"primarykey;type:int"`
+	UserId        int64     `gorm:"type:int;not null"`
+	Row           int64     `gorm:"type:int;not null"`
+	Col           int64     `gorm:"type:int;not null"`
+	Status        string    `gorm:"type:varchar(45);not null"`
+	CurrentLevel  int64     `gorm:"type:int;not null"`
+	Current       int64     `gorm:"type:bigint;not null"`
+	CurrentMax    int64     `gorm:"type:bigint;not null"`
+	CurrentMaxNew int64     `gorm:"type:bigint;not null"`
+	StopDate      time.Time `gorm:"type:datetime;not null"`
+	CreatedAt     time.Time `gorm:"type:datetime;not null"`
+	UpdatedAt     time.Time `gorm:"type:datetime;not null"`
 }
 type LocationNew struct {
 	ID                int64     `gorm:"primarykey;type:int"`
@@ -384,7 +385,7 @@ func (lr *LocationRepo) GetAllLocationsNew(ctx context.Context) ([]*biz.Location
 func (lr *LocationRepo) GetLocationsByUserId(ctx context.Context, userId int64) ([]*biz.Location, error) {
 	var locations []*Location
 	res := make([]*biz.Location, 0)
-	if err := lr.data.db.Table("location").
+	if err := lr.data.db.Table("location_new").
 		Where("user_id=?", userId).
 		Order("id desc").Find(&locations).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -396,14 +397,15 @@ func (lr *LocationRepo) GetLocationsByUserId(ctx context.Context, userId int64) 
 
 	for _, location := range locations {
 		res = append(res, &biz.Location{
-			ID:           location.ID,
-			UserId:       location.UserId,
-			Status:       location.Status,
-			CurrentLevel: location.CurrentLevel,
-			Current:      location.Current,
-			CurrentMax:   location.CurrentMax,
-			Row:          location.Row,
-			Col:          location.Col,
+			ID:            location.ID,
+			UserId:        location.UserId,
+			Status:        location.Status,
+			CurrentLevel:  location.CurrentLevel,
+			Current:       location.Current,
+			CurrentMax:    location.CurrentMax,
+			CurrentMaxNew: location.CurrentMaxNew,
+			Row:           location.Row,
+			Col:           location.Col,
 		})
 	}
 

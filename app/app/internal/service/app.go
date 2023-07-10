@@ -161,6 +161,7 @@ func (a *AppService) Deposit4(ctx context.Context, req *v1.DepositRequest) (*v1.
 		err                   error
 	)
 
+	time.Sleep(8 * time.Second)
 	end := time.Now().UTC().Add(20 * time.Second)
 
 	// 配置
@@ -262,6 +263,7 @@ func (a *AppService) Deposit3(ctx context.Context, req *v1.DepositRequest) (*v1.
 		err                   error
 	)
 
+	time.Sleep(16 * time.Second)
 	end := time.Now().UTC().Add(20 * time.Second)
 
 	// 配置

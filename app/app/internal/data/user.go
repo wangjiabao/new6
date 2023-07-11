@@ -1291,7 +1291,7 @@ func (ub *UserBalanceRepo) DepositLastNewDhb(ctx context.Context, userId int64, 
 	var (
 		err error
 	)
-	if err = ub.data.DB(ctx).Table("user_balance_lock").
+	if err = ub.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
 		Updates(map[string]interface{}{"balance_dhb": gorm.Expr("balance_dhb + ?", lastCoinAmount)}).Error; nil != err {
 		return errors.NotFound("user balance err", "user balance not found")
@@ -1305,7 +1305,7 @@ func (ub *UserBalanceRepo) DepositLastNewCsd(ctx context.Context, userId int64, 
 	var (
 		err error
 	)
-	if err = ub.data.DB(ctx).Table("user_balance_lock").
+	if err = ub.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
 		Updates(map[string]interface{}{"balance_usdt": gorm.Expr("balance_usdt + ?", lastCoinAmount)}).Error; nil != err {
 		return errors.NotFound("user balance err", "user balance not found")

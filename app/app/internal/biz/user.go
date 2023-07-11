@@ -241,7 +241,7 @@ type UserBalanceRepo interface {
 	UserDailyLocationReward(ctx context.Context, userId int64, rewardAmount int64, amount int64, coinAmount int64, status string, locationId int64) (int64, error)
 	DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastUsdtAmount int64, lastCoinAmount int64) (int64, error)
 	DepositLastNewDhb(ctx context.Context, userId int64, lastCoinAmount int64) error
-	DepositLastNewCsd(ctx context.Context, userId int64, lastCoinAmount int64) error
+	DepositLastNewCsd(ctx context.Context, userId int64, lastCoinAmount int64, tmpRecommendUserIdsInt []int64) error
 	UpdateBalanceRewardLastRewardDate(ctx context.Context, id int64) error
 	UpdateLocationAgain(ctx context.Context, locations []*LocationNew) error
 	LocationNewDailyReward(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)

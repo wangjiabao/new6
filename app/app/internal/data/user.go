@@ -1301,10 +1301,18 @@ func (ub *UserBalanceRepo) DepositLastNewDhb(ctx context.Context, userId int64, 
 }
 
 // DepositLastNewCsd .
-func (ub *UserBalanceRepo) DepositLastNewCsd(ctx context.Context, userId int64, lastCoinAmount int64) error {
+func (ub *UserBalanceRepo) DepositLastNewCsd(ctx context.Context, userId int64, lastCoinAmount int64, tmpRecommendUserIdsInt []int64) error {
 	var (
 		err error
 	)
+	if len(tmpRecommendUserIdsInt) > 0 {
+		if err = ub.data.DB(ctx).Table("user_info").
+			Where("user_id in (?)", tmpRecommendUserIdsInt).
+			Updates(map[string]interface{}{"team_csd_balance": gorm.Expr("team_csd_balance + ?", lastCoinAmount)}).Error; nil != err {
+			return errors.NotFound("user balance err", "user balance not found")
+		}
+	}
+
 	if err = ub.data.DB(ctx).Table("user_balance").
 		Where("user_id=?", userId).
 		Updates(map[string]interface{}{"balance_usdt": gorm.Expr("balance_usdt + ?", lastCoinAmount)}).Error; nil != err {

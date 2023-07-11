@@ -673,7 +673,32 @@ func (ruc *RecordUseCase) EthUserRecordHandle2(ctx context.Context, ethUserRecor
 			//		stopCoin += tmpCurrentAmount * coinRewardRate / 100 * 1000 / coinPrice
 			//
 			if "CSD" == v.CoinType {
-				err = ruc.userBalanceRepo.DepositLastNewCsd(ctx, v.UserId, v.RelAmount) // 充值
+				// 推荐人
+				var (
+					tmpRecommendUserIds    []string
+					tmpRecommendUserIdsInt []int64
+				)
+				var userRecommend *UserRecommend
+				userRecommend, err = ruc.userRecommendRepo.GetUserRecommendByUserId(ctx, v.UserId)
+				if nil == err {
+					if "" != userRecommend.RecommendCode {
+						tmpRecommendUserIds = strings.Split(userRecommend.RecommendCode, "D")
+						lastKey := len(tmpRecommendUserIds) - 1
+						if 1 <= lastKey {
+							for i := 0; i <= lastKey; i++ {
+								// 有占位信息，推荐人推荐人的上一代
+								if lastKey-i <= 0 {
+									break
+								}
+
+								tmpMyTopUserRecommendUserId, _ := strconv.ParseInt(tmpRecommendUserIds[lastKey-i], 10, 64) // 最后一位是直推人
+								tmpRecommendUserIdsInt = append(tmpRecommendUserIdsInt, tmpMyTopUserRecommendUserId)
+							}
+						}
+					}
+				}
+
+				err = ruc.userBalanceRepo.DepositLastNewCsd(ctx, v.UserId, v.RelAmount, tmpRecommendUserIdsInt) // 充值
 				if nil != err {
 					return err
 				}

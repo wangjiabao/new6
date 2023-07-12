@@ -2778,8 +2778,8 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 				vip4Count++
 			}
 		}
-		teamCsdBalance = user.TeamCsdBalance / 1000000000
-		myUserBalance = userBalance.BalanceUsdt / 1000000000
+		teamCsdBalance = user.TeamCsdBalance / 10000000000
+		myUserBalance = userBalance.BalanceUsdt / 10000000000
 
 		if teamCsdBalance >= vip5BalanceTeam && 2 <= vip4Count && 2 <= user.HistoryRecommend && myUserBalance >= vip5Balance {
 			myVip = 6

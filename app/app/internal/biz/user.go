@@ -281,6 +281,7 @@ type UserInfoRepo interface {
 	CreateUserInfo(ctx context.Context, u *User) (*UserInfo, error)
 	GetUserInfoByUserId(ctx context.Context, userId int64) (*UserInfo, error)
 	UpdateUserInfo(ctx context.Context, u *UserInfo) (*UserInfo, error)
+	UpdateUserInfo2(ctx context.Context, u *UserInfo) (*UserInfo, error)
 	UpdateUserInfoVip(ctx context.Context, userId, vip int64) (*UserInfo, error)
 	GetUserInfoByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserInfo, error)
 }
@@ -1053,7 +1054,7 @@ func (uuc *UserUseCase) AdminVipUpdate(ctx context.Context, req *v1.AdminVipUpda
 		userInfo.Vip = 2
 	}
 
-	_, err = uuc.uiRepo.UpdateUserInfo(ctx, userInfo) // 推荐人信息修改
+	_, err = uuc.uiRepo.UpdateUserInfo2(ctx, userInfo) // 推荐人信息修改
 	if nil != err {
 		return res, err
 	}

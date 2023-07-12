@@ -723,6 +723,25 @@ func (ui *UserInfoRepo) CreateUserInfo(ctx context.Context, u *biz.User) (*biz.U
 func (ui *UserInfoRepo) UpdateUserInfo(ctx context.Context, u *biz.UserInfo) (*biz.UserInfo, error) {
 	var userInfo UserInfo
 	userInfo.Vip = u.Vip
+	userInfo.HistoryRecommend = u.HistoryRecommend
+
+	res := ui.data.DB(ctx).Table("user_info").Where("user_id=?", u.UserId).Updates(&userInfo)
+	if res.Error != nil {
+		return nil, errors.New(500, "UPDATE_USER_INFO_ERROR", "用户信息修改失败")
+	}
+
+	return &biz.UserInfo{
+		ID:               userInfo.ID,
+		UserId:           userInfo.UserId,
+		Vip:              userInfo.Vip,
+		HistoryRecommend: userInfo.HistoryRecommend,
+	}, nil
+}
+
+// UpdateUserInfo2 .
+func (ui *UserInfoRepo) UpdateUserInfo2(ctx context.Context, u *biz.UserInfo) (*biz.UserInfo, error) {
+	var userInfo UserInfo
+	userInfo.Vip = u.Vip
 	userInfo.LockVip = 1
 
 	res := ui.data.DB(ctx).Table("user_info").Where("user_id=?", u.UserId).Updates(&userInfo)

@@ -46,6 +46,7 @@ type UserInfo struct {
 	UserId           int64
 	Vip              int64
 	HistoryRecommend int64
+	LockVip          int64
 	TeamCsdBalance   int64
 }
 
@@ -1042,19 +1043,14 @@ func (uuc *UserUseCase) AdminVipUpdate(ctx context.Context, req *v1.AdminVipUpda
 
 	if 5 == req.SendBody.Vip {
 		userInfo.Vip = 6
-		userInfo.HistoryRecommend = 25
 	} else if 4 == req.SendBody.Vip {
 		userInfo.Vip = 5
-		userInfo.HistoryRecommend = 20
 	} else if 3 == req.SendBody.Vip {
 		userInfo.Vip = 4
-		userInfo.HistoryRecommend = 15
 	} else if 2 == req.SendBody.Vip {
 		userInfo.Vip = 3
-		userInfo.HistoryRecommend = 10
 	} else if 1 == req.SendBody.Vip {
 		userInfo.Vip = 2
-		userInfo.HistoryRecommend = 5
 	}
 
 	_, err = uuc.uiRepo.UpdateUserInfo(ctx, userInfo) // 推荐人信息修改
@@ -2724,6 +2720,10 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 	}
 
 	for _, user := range users {
+		if 0 < user.LockVip {
+			continue
+		}
+
 		var (
 			userRecommend         *UserRecommend
 			userRecommends        []*UserRecommend

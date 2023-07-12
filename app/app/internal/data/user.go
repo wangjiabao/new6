@@ -32,6 +32,7 @@ type UserInfo struct {
 	UserId           int64     `gorm:"type:int;not null"`
 	Vip              int64     `gorm:"type:int;not null"`
 	HistoryRecommend int64     `gorm:"type:int;not null"`
+	LockVip          int64     `gorm:"type:int;not null"`
 	TeamCsdBalance   int64     `gorm:"type:bigint;not null"`
 	CreatedAt        time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt        time.Time `gorm:"type:datetime;not null"`
@@ -509,6 +510,7 @@ func (u *UserRepo) GetAllUserInfos(ctx context.Context) ([]*biz.UserInfo, error)
 			Vip:              item.Vip,
 			HistoryRecommend: item.HistoryRecommend,
 			TeamCsdBalance:   item.TeamCsdBalance,
+			LockVip:          item.LockVip,
 		})
 	}
 	return res, nil
@@ -721,7 +723,7 @@ func (ui *UserInfoRepo) CreateUserInfo(ctx context.Context, u *biz.User) (*biz.U
 func (ui *UserInfoRepo) UpdateUserInfo(ctx context.Context, u *biz.UserInfo) (*biz.UserInfo, error) {
 	var userInfo UserInfo
 	userInfo.Vip = u.Vip
-	userInfo.HistoryRecommend = u.HistoryRecommend
+	userInfo.LockVip = 1
 
 	res := ui.data.DB(ctx).Table("user_info").Where("user_id=?", u.UserId).Updates(&userInfo)
 	if res.Error != nil {

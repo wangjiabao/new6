@@ -813,7 +813,7 @@ func (a *AppService) AdminList(ctx context.Context, req *v1.AdminListRequest) (*
 }
 
 func (a *AppService) AdminVipUpdate(ctx context.Context, req *v1.AdminVipUpdateRequest) (*v1.AdminVipUpdateReply, error) {
-	return a.uuc.AdminVipUpdate(ctx, req), nil
+	return a.uuc.AdminVipUpdate(ctx, req)
 }
 
 func (a *AppService) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (*v1.VipCheckReply, error) {

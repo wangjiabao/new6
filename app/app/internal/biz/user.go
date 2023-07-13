@@ -1710,6 +1710,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 		lastVip := int64(1)
 		levelRewardCount := 5
 		withdrawTeamVip := int64(0)
+		levelOk := 0
 		for i := 0; i <= lastKey; i++ {
 			// 有占位信息，推荐人推荐人的上一代
 			if lastKey-i <= 0 {
@@ -1769,11 +1770,12 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 					}
 
 					lastVip = myUserTopRecommendUserInfo.Vip
+					levelOk = 1
 					continue
 				}
 
 				// 平级奖
-				if lastVip == myUserTopRecommendUserInfo.Vip && 0 < levelRewardCount { // 上一个是vip1和以上且和我平级
+				if 0 < levelOk && lastVip == myUserTopRecommendUserInfo.Vip && 0 < levelRewardCount { // 上一个是vip1和以上且和我平级
 					levelRewardCount--
 					if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 						_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, withdraw.ID, tmpRecommendUserIdsInt)

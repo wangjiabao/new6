@@ -2753,7 +2753,7 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 
 		// 我的伞下所有用户
 		myCode = userRecommend.RecommendCode + "D" + strconv.FormatInt(user.ID, 10)
-		userRecommends, err = uuc.urRepo.GetUserRecommendByCode(ctx, myCode)
+		userRecommends, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, myCode)
 		if nil == err {
 			for _, vUserRecommends := range userRecommends {
 				userRecommendsUserIds = append(userRecommendsUserIds, vUserRecommends.UserId)

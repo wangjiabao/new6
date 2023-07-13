@@ -101,6 +101,7 @@ type Trade struct {
 	RelAmountCsd int64     `gorm:"type:bigint"`
 	AmountHbs    int64     `gorm:"type:bigint"`
 	RelAmountHbs int64     `gorm:"type:bigint"`
+	CsdReward    int64     `gorm:"type:bigint"`
 	Status       string    `gorm:"type:varchar(45);not null"`
 	CreatedAt    time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt    time.Time `gorm:"type:datetime;not null"`
@@ -1650,6 +1651,7 @@ func (ub *UserBalanceRepo) GetTradeNotDeal(ctx context.Context) ([]*biz.Trade, e
 			AmountCsd:    trade.AmountCsd,
 			RelAmountCsd: trade.RelAmountCsd,
 			AmountHbs:    trade.AmountHbs,
+			CsdReward:    trade.CsdReward,
 			RelAmountHbs: trade.RelAmountHbs,
 			Status:       trade.Status,
 			CreatedAt:    trade.CreatedAt,

@@ -120,6 +120,7 @@ type Trade struct {
 	AmountCsd    int64
 	RelAmountCsd int64
 	AmountHbs    int64
+	CsdReward    int64
 	RelAmountHbs int64
 	Status       string
 	CreatedAt    time.Time
@@ -1721,7 +1722,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 				continue
 			}
 			//
-			rewardAmount := withdraw.AmountCsd * withdrawRate / 100
+			rewardAmount := withdraw.CsdReward * withdrawRate / 100
 			tmpRecommendUserIdsInt := make([]int64, 0)
 			if 1 < lastKey-i {
 				for _, va := range tmpRecommendUserIds[1 : lastKey-i] {

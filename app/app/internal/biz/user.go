@@ -1724,9 +1724,69 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 			rewardAmount := withdraw.AmountCsd * withdrawRate / 100
 			tmpRecommendUserIdsInt := make([]int64, 0)
 			if 1 < lastKey-i {
-				for _, v1 := range tmpRecommendUserIds[1 : lastKey-i] {
-					tmpRecommendUserIdsInt1, _ := strconv.ParseInt(v1, 10, 64)
+				for _, va := range tmpRecommendUserIds[1 : lastKey-i] {
+					tmpRecommendUserIdsInt1, _ := strconv.ParseInt(va, 10, 64)
 					tmpRecommendUserIdsInt = append(tmpRecommendUserIdsInt, tmpRecommendUserIdsInt1)
+				}
+			}
+
+			if lastVip <= myUserTopRecommendUserInfo.Vip { // 上一个级别比我高
+				// 会员团队
+				if lastVip < myUserTopRecommendUserInfo.Vip && withdrawTeamVipFifthRate >= withdrawTeamVip {
+					var tmp int64
+					if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+
+						if 2 == myUserTopRecommendUserInfo.Vip {
+							tmp = withdrawTeamVipRate - withdrawTeamVip
+							withdrawTeamVip = withdrawTeamVipRate
+
+						} else if 3 == myUserTopRecommendUserInfo.Vip {
+							tmp = withdrawTeamVipSecondRate - withdrawTeamVip
+							withdrawTeamVip = withdrawTeamVipSecondRate
+
+						} else if 4 == myUserTopRecommendUserInfo.Vip {
+							tmp = withdrawTeamVipThirdRate - withdrawTeamVip
+							withdrawTeamVip = withdrawTeamVipThirdRate
+
+						} else if 5 == myUserTopRecommendUserInfo.Vip {
+							tmp = withdrawTeamVipFourthRate - withdrawTeamVip
+							withdrawTeamVip = withdrawTeamVipFourthRate
+
+						} else if 6 == myUserTopRecommendUserInfo.Vip {
+							tmp = withdrawTeamVipFifthRate - withdrawTeamVip
+							withdrawTeamVip = withdrawTeamVipFifthRate
+						}
+
+						_, err = uuc.ubRepo.WithdrawNewRewardTeamRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*tmp/100, withdraw.ID, tmpRecommendUserIdsInt)
+						if nil != err {
+							return err
+						}
+
+						return nil
+					}); nil != err {
+						continue
+					}
+
+					lastVip = myUserTopRecommendUserInfo.Vip
+					continue
+				}
+
+				// 平级奖
+				if lastVip == myUserTopRecommendUserInfo.Vip && 0 < levelRewardCount { // 上一个是vip1和以上且和我平级
+					levelRewardCount--
+					if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+						_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, withdraw.ID, tmpRecommendUserIdsInt)
+						if nil != err {
+							return err
+						}
+
+						return nil
+					}); nil != err {
+						continue
+					}
+
+					lastVip = myUserTopRecommendUserInfo.Vip
+					continue
 				}
 			}
 
@@ -1756,71 +1816,6 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 					continue
 				}
 
-				continue
-			}
-
-			// 第三个才走这里
-			if 2 > myUserTopRecommendUserInfo.Vip {
-				continue
-			}
-
-			if lastVip > myUserTopRecommendUserInfo.Vip { // 上一个级别比我高
-				continue
-			}
-
-			// 平级奖
-			if lastVip == myUserTopRecommendUserInfo.Vip && 0 < levelRewardCount { // 上一个是vip1和以上且和我平级
-				lastVip = myUserTopRecommendUserInfo.Vip
-				levelRewardCount--
-				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, withdraw.ID, tmpRecommendUserIdsInt)
-					if nil != err {
-						return err
-					}
-
-					return nil
-				}); nil != err {
-					continue
-				}
-				continue
-			}
-
-			// 会员团队
-			lastVip = myUserTopRecommendUserInfo.Vip
-			if withdrawTeamVipFifthRate < withdrawTeamVip {
-				continue
-			}
-			var tmp int64
-			if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-
-				if 2 == myUserTopRecommendUserInfo.Vip {
-					tmp = withdrawTeamVipRate - withdrawTeamVip
-					withdrawTeamVip = withdrawTeamVipRate
-
-				} else if 3 == myUserTopRecommendUserInfo.Vip {
-					tmp = withdrawTeamVipSecondRate - withdrawTeamVip
-					withdrawTeamVip = withdrawTeamVipSecondRate
-
-				} else if 4 == myUserTopRecommendUserInfo.Vip {
-					tmp = withdrawTeamVipThirdRate - withdrawTeamVip
-					withdrawTeamVip = withdrawTeamVipThirdRate
-
-				} else if 5 == myUserTopRecommendUserInfo.Vip {
-					tmp = withdrawTeamVipFourthRate - withdrawTeamVip
-					withdrawTeamVip = withdrawTeamVipFourthRate
-
-				} else if 6 == myUserTopRecommendUserInfo.Vip {
-					tmp = withdrawTeamVipFifthRate - withdrawTeamVip
-					withdrawTeamVip = withdrawTeamVipFifthRate
-				}
-
-				_, err = uuc.ubRepo.WithdrawNewRewardTeamRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*tmp/100, withdraw.ID, tmpRecommendUserIdsInt)
-				if nil != err {
-					return err
-				}
-
-				return nil
-			}); nil != err {
 				continue
 			}
 		}

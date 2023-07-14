@@ -2722,9 +2722,6 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 		if 0 < user.LockVip {
 			continue
 		}
-		if user.ID != 1 {
-			continue
-		}
 
 		var (
 			userRecommend  *UserRecommend

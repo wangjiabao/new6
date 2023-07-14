@@ -2741,10 +2741,6 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 			continue
 		}
 
-		if user.ID != 40 {
-			continue
-		}
-
 		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, user.ID)
 		if nil != err {
 			continue
@@ -2759,11 +2755,9 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 		myCode = userRecommend.RecommendCode + "D" + strconv.FormatInt(user.ID, 10)
 
 		var (
-			UserInfos              map[int64]*UserInfo
-			userRecommends         []*UserRecommend
-			userRecommendsUserIds  []int64
-			userRecommends1        []*UserRecommend
-			userRecommendsUserIds1 []int64
+			UserInfos             map[int64]*UserInfo
+			userRecommends        []*UserRecommend
+			userRecommendsUserIds []int64
 		)
 
 		userRecommends, err = uuc.urRepo.GetUserRecommendByCode(ctx, myCode)
@@ -2789,6 +2783,11 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 
 		if 0 < len(userRecommends) {
 			for _, vUserRecommendsQ := range userRecommends {
+
+				var (
+					userRecommends1        []*UserRecommend
+					userRecommendsUserIds1 []int64
+				)
 				myCode1 := vUserRecommendsQ.RecommendCode + "D" + strconv.FormatInt(vUserRecommendsQ.UserId, 10)
 				userRecommends1, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, myCode1)
 				if nil == err {
@@ -2796,10 +2795,12 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 						userRecommendsUserIds1 = append(userRecommendsUserIds1, vUserRecommends1.UserId)
 					}
 				}
+
 				var UserInfos1 map[int64]*UserInfo
 				if 0 < len(userRecommendsUserIds1) {
 					UserInfos1, err = uuc.uiRepo.GetUserInfoByUserIds(ctx, userRecommendsUserIds1...)
 				}
+
 				for _, vUserInfos1 := range UserInfos1 {
 					if 2 == vUserInfos1.Vip {
 						vip1Count1[vUserRecommendsQ.UserId] += 1
@@ -2840,8 +2841,6 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 				vip4Count++
 			}
 		}
-
-		fmt.Println(vip1Count, vip2Count, vip3Count, vip4Count)
 
 		teamCsdBalance = user.TeamCsdBalance / 10000000000
 		myUserBalance = userBalance.BalanceUsdt / 10000000000

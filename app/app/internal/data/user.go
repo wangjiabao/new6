@@ -495,7 +495,7 @@ func (u *UserRepo) GetAllUsers(ctx context.Context) ([]*biz.User, error) {
 // GetAllUserInfos .
 func (u *UserRepo) GetAllUserInfos(ctx context.Context) ([]*biz.UserInfo, error) {
 	var users []*UserInfo
-	if err := u.data.db.Table("user_info").Find(&users).Error; err != nil {
+	if err := u.data.db.Table("user_info").Order("id desc").Find(&users).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.NotFound("USER_NOT_FOUND", "user not found")
 		}

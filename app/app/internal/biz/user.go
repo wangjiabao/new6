@@ -2722,22 +2722,23 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 		if 0 < user.LockVip {
 			continue
 		}
+		if user.ID != 1 {
+			continue
+		}
 
 		var (
-			userRecommend         *UserRecommend
-			userRecommends        []*UserRecommend
-			userBalance           *UserBalance
-			UserInfos             map[int64]*UserInfo
-			userRecommendsUserIds []int64
-			myCode                string
-			teamCsdBalance        int64
-			myUserBalance         int64
-			vip1Count             int64
-			vip2Count             int64
-			vip3Count             int64
-			vip4Count             int64
-			myVip                 int64 = 1
+			userRecommend  *UserRecommend
+			userBalance    *UserBalance
+			myCode         string
+			teamCsdBalance int64
+			myUserBalance  int64
+			myVip          int64 = 1
 		)
+
+		vip1Count1 := make(map[int64]int64, 0)
+		vip2Count1 := make(map[int64]int64, 0)
+		vip3Count1 := make(map[int64]int64, 0)
+		vip4Count1 := make(map[int64]int64, 0)
 
 		if 1 > user.Vip {
 			continue
@@ -2755,7 +2756,16 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 
 		// 我的伞下所有用户
 		myCode = userRecommend.RecommendCode + "D" + strconv.FormatInt(user.ID, 10)
-		userRecommends, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, myCode)
+
+		var (
+			UserInfos              map[int64]*UserInfo
+			userRecommends         []*UserRecommend
+			userRecommendsUserIds  []int64
+			userRecommends1        []*UserRecommend
+			userRecommendsUserIds1 []int64
+		)
+
+		userRecommends, err = uuc.urRepo.GetUserRecommendByCode(ctx, myCode)
 		if nil == err {
 			for _, vUserRecommends := range userRecommends {
 				userRecommendsUserIds = append(userRecommendsUserIds, vUserRecommends.UserId)
@@ -2764,21 +2774,74 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 		if 0 < len(userRecommendsUserIds) {
 			UserInfos, err = uuc.uiRepo.GetUserInfoByUserIds(ctx, userRecommendsUserIds...)
 		}
-
 		for _, vUserInfos := range UserInfos {
 			if 2 == vUserInfos.Vip {
-				vip1Count++
+				vip1Count1[vUserInfos.UserId] += 1
 			} else if 3 == vUserInfos.Vip {
-				vip2Count++
+				vip2Count1[vUserInfos.UserId] += 1
 			} else if 4 == vUserInfos.Vip {
-				vip3Count++
+				vip3Count1[vUserInfos.UserId] += 1
 			} else if 5 == vUserInfos.Vip {
+				vip4Count1[vUserInfos.UserId] += 1
+			}
+		}
+
+		for _, vUserRecommendsQ := range userRecommends {
+			myCode1 := vUserRecommendsQ.RecommendCode + "D" + strconv.FormatInt(vUserRecommendsQ.UserId, 10)
+			userRecommends1, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, myCode1)
+			if nil == err {
+				for _, vUserRecommends1 := range userRecommends1 {
+					userRecommendsUserIds1 = append(userRecommendsUserIds1, vUserRecommends1.UserId)
+				}
+			}
+			var UserInfos1 map[int64]*UserInfo
+			if 0 < len(userRecommendsUserIds1) {
+				UserInfos1, err = uuc.uiRepo.GetUserInfoByUserIds(ctx, userRecommendsUserIds1...)
+			}
+			for _, vUserInfos1 := range UserInfos1 {
+				if 2 == vUserInfos1.Vip {
+					vip1Count1[vUserRecommendsQ.UserId] += 1
+				} else if 3 == vUserInfos1.Vip {
+					vip2Count1[vUserRecommendsQ.UserId] += 1
+				} else if 4 == vUserInfos1.Vip {
+					vip3Count1[vUserRecommendsQ.UserId] += 1
+				} else if 5 == vUserInfos1.Vip {
+					vip4Count1[vUserRecommendsQ.UserId] += 1
+				}
+			}
+		}
+
+		var (
+			vip1Count int64
+			vip2Count int64
+			vip3Count int64
+			vip4Count int64
+		)
+		for _, vv1 := range vip1Count1 {
+			if vv1 > 0 {
+				vip1Count++
+			}
+		}
+		for _, vv2 := range vip2Count1 {
+			if vv2 > 0 {
+				vip2Count++
+			}
+		}
+		for _, vv3 := range vip3Count1 {
+			if vv3 > 0 {
+				vip3Count++
+			}
+		}
+		for _, vv4 := range vip4Count1 {
+			if vv4 > 0 {
 				vip4Count++
 			}
 		}
+
+		fmt.Println(vip1Count, vip2Count, vip3Count, vip4Count)
+
 		teamCsdBalance = user.TeamCsdBalance / 10000000000
 		myUserBalance = userBalance.BalanceUsdt / 10000000000
-
 		if teamCsdBalance >= vip5BalanceTeam && 2 <= vip4Count && 2 <= user.HistoryRecommend && myUserBalance >= vip5Balance {
 			myVip = 6
 		} else if teamCsdBalance >= vip4BalanceTeam && 2 <= vip3Count && 2 <= user.HistoryRecommend && myUserBalance >= vip4Balance {

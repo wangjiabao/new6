@@ -2741,6 +2741,10 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 			continue
 		}
 
+		if user.ID != 40 {
+			continue
+		}
+
 		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, user.ID)
 		if nil != err {
 			continue
@@ -2783,27 +2787,29 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 			}
 		}
 
-		for _, vUserRecommendsQ := range userRecommends {
-			myCode1 := vUserRecommendsQ.RecommendCode + "D" + strconv.FormatInt(vUserRecommendsQ.UserId, 10)
-			userRecommends1, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, myCode1)
-			if nil == err {
-				for _, vUserRecommends1 := range userRecommends1 {
-					userRecommendsUserIds1 = append(userRecommendsUserIds1, vUserRecommends1.UserId)
+		if 0 < len(userRecommends) {
+			for _, vUserRecommendsQ := range userRecommends {
+				myCode1 := vUserRecommendsQ.RecommendCode + "D" + strconv.FormatInt(vUserRecommendsQ.UserId, 10)
+				userRecommends1, err = uuc.urRepo.GetUserRecommendLikeCode(ctx, myCode1)
+				if nil == err {
+					for _, vUserRecommends1 := range userRecommends1 {
+						userRecommendsUserIds1 = append(userRecommendsUserIds1, vUserRecommends1.UserId)
+					}
 				}
-			}
-			var UserInfos1 map[int64]*UserInfo
-			if 0 < len(userRecommendsUserIds1) {
-				UserInfos1, err = uuc.uiRepo.GetUserInfoByUserIds(ctx, userRecommendsUserIds1...)
-			}
-			for _, vUserInfos1 := range UserInfos1 {
-				if 2 == vUserInfos1.Vip {
-					vip1Count1[vUserRecommendsQ.UserId] += 1
-				} else if 3 == vUserInfos1.Vip {
-					vip2Count1[vUserRecommendsQ.UserId] += 1
-				} else if 4 == vUserInfos1.Vip {
-					vip3Count1[vUserRecommendsQ.UserId] += 1
-				} else if 5 == vUserInfos1.Vip {
-					vip4Count1[vUserRecommendsQ.UserId] += 1
+				var UserInfos1 map[int64]*UserInfo
+				if 0 < len(userRecommendsUserIds1) {
+					UserInfos1, err = uuc.uiRepo.GetUserInfoByUserIds(ctx, userRecommendsUserIds1...)
+				}
+				for _, vUserInfos1 := range UserInfos1 {
+					if 2 == vUserInfos1.Vip {
+						vip1Count1[vUserRecommendsQ.UserId] += 1
+					} else if 3 == vUserInfos1.Vip {
+						vip2Count1[vUserRecommendsQ.UserId] += 1
+					} else if 4 == vUserInfos1.Vip {
+						vip3Count1[vUserRecommendsQ.UserId] += 1
+					} else if 5 == vUserInfos1.Vip {
+						vip4Count1[vUserRecommendsQ.UserId] += 1
+					}
 				}
 			}
 		}

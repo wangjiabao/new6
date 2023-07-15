@@ -247,10 +247,10 @@ type UserBalanceRepo interface {
 	UpdateBalanceRewardLastRewardDate(ctx context.Context, id int64) error
 	UpdateLocationAgain(ctx context.Context, locations []*LocationNew) error
 	LocationNewDailyReward(ctx context.Context, userId int64, amount int64, locationId int64) (int64, error)
-	WithdrawNewRewardRecommend(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
-	WithdrawNewRewardTeamRecommend(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
-	WithdrawNewRewardSecondRecommend(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
-	WithdrawNewRewardLevelRecommend(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
+	WithdrawNewRewardRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
+	WithdrawNewRewardTeamRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
+	WithdrawNewRewardSecondRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
+	WithdrawNewRewardLevelRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
 }
 
 type UserRecommendRepo interface {
@@ -1723,7 +1723,8 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 				continue
 			}
 			//
-			rewardAmount := withdraw.CsdReward * withdrawRate / 100
+			rewardAmount := withdraw.AmountCsd * withdrawRate / 100
+			rewardAmountDhb := withdraw.AmountHbs * withdrawRate / 100
 			tmpRecommendUserIdsInt := make([]int64, 0)
 			if 1 < lastKey-i {
 				for _, va := range tmpRecommendUserIds[1 : lastKey-i] {
@@ -1759,7 +1760,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 							withdrawTeamVip = withdrawTeamVipFifthRate
 						}
 
-						_, err = uuc.ubRepo.WithdrawNewRewardTeamRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*tmp/100, withdraw.ID, tmpRecommendUserIdsInt)
+						_, err = uuc.ubRepo.WithdrawNewRewardTeamRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*tmp/100, rewardAmountDhb*tmp/100, withdraw.ID, tmpRecommendUserIdsInt)
 						if nil != err {
 							return err
 						}
@@ -1778,7 +1779,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 				if 0 < levelOk && lastVip == myUserTopRecommendUserInfo.Vip && 0 < levelRewardCount { // 上一个是vip1和以上且和我平级
 					levelRewardCount--
 					if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-						_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, withdraw.ID, tmpRecommendUserIdsInt)
+						_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, rewardAmountDhb*withdrawTeamVipLevelRate/100, withdraw.ID, tmpRecommendUserIdsInt)
 						if nil != err {
 							return err
 						}
@@ -1796,7 +1797,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 			if 0 == i { // 当前用户被此人直推
 
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					_, err = uuc.ubRepo.WithdrawNewRewardRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendRate/100, withdraw.ID, tmpRecommendUserIdsInt)
+					_, err = uuc.ubRepo.WithdrawNewRewardRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendRate/100, rewardAmountDhb*withdrawRecommendRate/100, withdraw.ID, tmpRecommendUserIdsInt)
 					if nil != err {
 						return err
 					}
@@ -1809,7 +1810,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 				continue
 			} else if 1 == i { // 间接推
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-					_, err = uuc.ubRepo.WithdrawNewRewardSecondRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendSecondRate/100, withdraw.ID, tmpRecommendUserIdsInt)
+					_, err = uuc.ubRepo.WithdrawNewRewardSecondRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendSecondRate/100, rewardAmountDhb*withdrawRecommendSecondRate/100, withdraw.ID, tmpRecommendUserIdsInt)
 					if nil != err {
 						return err
 					}

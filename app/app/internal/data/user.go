@@ -122,6 +122,7 @@ type Reward struct {
 	ID               int64     `gorm:"primarykey;type:int"`
 	UserId           int64     `gorm:"type:int;not null"`
 	Amount           int64     `gorm:"type:bigint;not null"`
+	AmountB          int64     `gorm:"type:bigint;not null"`
 	BalanceRecordId  int64     `gorm:"type:int;not null"`
 	Type             string    `gorm:"type:varchar(45);not null"`
 	TypeRecordId     int64     `gorm:"type:int;not null"`
@@ -2516,7 +2517,7 @@ func (ub *UserBalanceRepo) LocationNewDailyReward(ctx context.Context, userId in
 }
 
 // WithdrawNewRewardTeamRecommend .
-func (ub *UserBalanceRepo) WithdrawNewRewardTeamRecommend(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error) {
+func (ub *UserBalanceRepo) WithdrawNewRewardTeamRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error) {
 	var err error
 	var location LocationNew
 	if err = ub.data.db.Table("location_new").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
@@ -2546,9 +2547,16 @@ func (ub *UserBalanceRepo) WithdrawNewRewardTeamRecommend(ctx context.Context, u
 		}
 	}
 
+	if err = ub.data.DB(ctx).Table("user_balance").
+		Where("user_id=?", userId).
+		Updates(map[string]interface{}{"balance_dhb": gorm.Expr("balance_dhb + ?", amountB)}).Error; nil != err {
+		return 0, errors.NotFound("user balance err", "user balance not found")
+	}
+
 	var reward Reward
 	reward.UserId = userId
 	reward.Amount = amount
+	reward.AmountB = amountB
 	reward.BalanceRecordId = 0
 	reward.Type = "withdraw" // 本次分红的行为类型
 	reward.TypeRecordId = locationId
@@ -2562,7 +2570,7 @@ func (ub *UserBalanceRepo) WithdrawNewRewardTeamRecommend(ctx context.Context, u
 }
 
 // WithdrawNewRewardRecommend .
-func (ub *UserBalanceRepo) WithdrawNewRewardRecommend(ctx context.Context, userId int64, amount int64, withdrawId int64, tmpRecommendUserIdsInt []int64) (int64, error) {
+func (ub *UserBalanceRepo) WithdrawNewRewardRecommend(ctx context.Context, userId int64, amount int64, amountB int64, withdrawId int64, tmpRecommendUserIdsInt []int64) (int64, error) {
 	var err error
 
 	//if err = ub.data.DB(ctx).Table("user_balance_lock").
@@ -2622,9 +2630,16 @@ func (ub *UserBalanceRepo) WithdrawNewRewardRecommend(ctx context.Context, userI
 		}
 	}
 
+	if err = ub.data.DB(ctx).Table("user_balance").
+		Where("user_id=?", userId).
+		Updates(map[string]interface{}{"balance_dhb": gorm.Expr("balance_dhb + ?", amountB)}).Error; nil != err {
+		return 0, errors.NotFound("user balance err", "user balance not found")
+	}
+
 	var reward Reward
 	reward.UserId = userId
 	reward.Amount = amount
+	reward.AmountB = amountB
 	reward.BalanceRecordId = 0
 	reward.Type = "withdraw" // 本次分红的行为类型
 	reward.TypeRecordId = withdrawId
@@ -2638,7 +2653,7 @@ func (ub *UserBalanceRepo) WithdrawNewRewardRecommend(ctx context.Context, userI
 }
 
 // WithdrawNewRewardSecondRecommend .
-func (ub *UserBalanceRepo) WithdrawNewRewardSecondRecommend(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error) {
+func (ub *UserBalanceRepo) WithdrawNewRewardSecondRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error) {
 	var err error
 	var location LocationNew
 	if err = ub.data.db.Table("location_new").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
@@ -2668,9 +2683,16 @@ func (ub *UserBalanceRepo) WithdrawNewRewardSecondRecommend(ctx context.Context,
 		}
 	}
 
+	if err = ub.data.DB(ctx).Table("user_balance").
+		Where("user_id=?", userId).
+		Updates(map[string]interface{}{"balance_dhb": gorm.Expr("balance_dhb + ?", amountB)}).Error; nil != err {
+		return 0, errors.NotFound("user balance err", "user balance not found")
+	}
+
 	var reward Reward
 	reward.UserId = userId
 	reward.Amount = amount
+	reward.AmountB = amountB
 	reward.BalanceRecordId = 0
 	reward.Type = "withdraw" // 本次分红的行为类型
 	reward.TypeRecordId = locationId
@@ -2684,7 +2706,7 @@ func (ub *UserBalanceRepo) WithdrawNewRewardSecondRecommend(ctx context.Context,
 }
 
 // WithdrawNewRewardLevelRecommend .
-func (ub *UserBalanceRepo) WithdrawNewRewardLevelRecommend(ctx context.Context, userId int64, amount int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error) {
+func (ub *UserBalanceRepo) WithdrawNewRewardLevelRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error) {
 	var err error
 	var location LocationNew
 	if err = ub.data.db.Table("location_new").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
@@ -2714,9 +2736,16 @@ func (ub *UserBalanceRepo) WithdrawNewRewardLevelRecommend(ctx context.Context, 
 		}
 	}
 
+	if err = ub.data.DB(ctx).Table("user_balance").
+		Where("user_id=?", userId).
+		Updates(map[string]interface{}{"balance_dhb": gorm.Expr("balance_dhb + ?", amountB)}).Error; nil != err {
+		return 0, errors.NotFound("user balance err", "user balance not found")
+	}
+
 	var reward Reward
 	reward.UserId = userId
 	reward.Amount = amount
+	reward.AmountB = amountB
 	reward.BalanceRecordId = 0
 	reward.Type = "withdraw" // 本次分红的行为类型
 	reward.TypeRecordId = locationId

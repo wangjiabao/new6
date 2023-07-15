@@ -1319,6 +1319,16 @@ func (ub *UserBalanceRepo) DepositLastNewDhb(ctx context.Context, userId int64, 
 		Updates(map[string]interface{}{"balance_dhb": gorm.Expr("balance_dhb + ?", lastCoinAmount)}).Error; nil != err {
 		return errors.NotFound("user balance err", "user balance not found")
 	}
+	var userBalanceRecode UserBalanceRecord
+	userBalanceRecode.Balance = 0
+	userBalanceRecode.UserId = userId
+	userBalanceRecode.Type = "deposit"
+	userBalanceRecode.CoinType = "HBS"
+	userBalanceRecode.Amount = lastCoinAmount
+	res := ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode)
+	if res.Error != nil {
+		return errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")
+	}
 
 	return nil
 }
@@ -1340,6 +1350,17 @@ func (ub *UserBalanceRepo) DepositLastNewCsd(ctx context.Context, userId int64, 
 		Where("user_id=?", userId).
 		Updates(map[string]interface{}{"balance_usdt": gorm.Expr("balance_usdt + ?", lastCoinAmount)}).Error; nil != err {
 		return errors.NotFound("user balance err", "user balance not found")
+	}
+
+	var userBalanceRecode UserBalanceRecord
+	userBalanceRecode.Balance = 0
+	userBalanceRecode.UserId = userId
+	userBalanceRecode.Type = "deposit"
+	userBalanceRecode.CoinType = "CSD"
+	userBalanceRecode.Amount = lastCoinAmount
+	res := ub.data.DB(ctx).Table("user_balance_record").Create(&userBalanceRecode)
+	if res.Error != nil {
+		return errors.New(500, "CREATE_LOCATION_ERROR", "占位信息创建失败")
 	}
 
 	return nil
@@ -3197,6 +3218,22 @@ func (ub UserBalanceRepo) GetUserBalanceRecordUsdtTotal(ctx context.Context) (in
 	if err := ub.data.db.Table("user_balance_record").
 		Where("type=?", "deposit").
 		Where("coin_type=?", "usdt").
+		Select("sum(amount) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_RECORD_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE RECORD ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
+func (ub UserBalanceRepo) GetUserBalanceRecordCsdTotal(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Table("user_balance_record").
+		Where("type=?", "deposit").
+		Where("coin_type=?", "CSD").
 		Select("sum(amount) as total").Take(&total).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return total.Total, errors.NotFound("USER_BALANCE_RECORD_NOT_FOUND", "user balance not found")

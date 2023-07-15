@@ -1185,6 +1185,10 @@ components:
                     type: string
                 todayWithdrawH:
                     type: string
+                withdrawH:
+                    type: string
+                totalC:
+                    type: string
                 allWithdrawBtc:
                     type: string
                 todayWithdrawBtc:

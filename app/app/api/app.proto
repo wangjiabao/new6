@@ -671,6 +671,8 @@ message AdminAllReply {
 	string totalH = 18; // 充值hbs数量
 	string allBalanceH = 17; // 全网可提hbs余额
 	string todayWithdrawH = 16; // 今日提币hbs金额
+	string withdrawH = 19; // hbs总提
+	string totalC = 20; // csd充值
 	string allWithdrawBtc = 12;
 	string todayWithdrawBtc = 11;
 	string allReward = 8; //

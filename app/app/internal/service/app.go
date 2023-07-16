@@ -929,7 +929,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		for i := 0; i < 3; i++ {
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
 			_, _, err = toToken("", users[withdraw.UserId].Address, withDrawAmount, tokenAddress)
-			fmt.Println(3333, err)
+			fmt.Println(33331, err, users[withdraw.UserId].Address, withDrawAmount, tokenAddress)
 			if err == nil {
 				_, err = a.uuc.UpdateWithdrawSuccess(ctx, withdraw.ID)
 				//time.Sleep(3 * time.Second)
@@ -1011,7 +1011,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		for i := 0; i < 3; i++ {
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
 			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeCsd, "0x538aC017AA01bA9665052660EA5783Ba91A48092")
-			fmt.Println(3333, err)
+			fmt.Println(33332, err)
 			if err == nil {
 				_, err = a.uuc.UpdateTrade(ctx, trade.ID)
 				//time.Sleep(3 * time.Second)
@@ -1032,7 +1032,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		for i := 0; i < 3; i++ {
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
 			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeHbs, "0x0905397af05dd0bdf76690ff318b10c6216e3069")
-			fmt.Println(3333, err)
+			fmt.Println(33334, err)
 			if err == nil {
 				_, err = a.uuc.UpdateTrade(ctx, trade.ID)
 				//time.Sleep(3 * time.Second)
@@ -1163,6 +1163,7 @@ func toToken(userPrivateKey string, toAccount string, withdrawAmount string, wit
 
 	err = client.SendTransaction(context.Background(), signedTx)
 	if err != nil {
+		fmt.Println(err)
 		return false, "", err
 	}
 	fmt.Println(signedTx.Hash().Hex())

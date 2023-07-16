@@ -1081,18 +1081,18 @@ func (uuc *UserUseCase) AdminConfigUpdate(ctx context.Context, req *v1.AdminConf
 }
 
 func (uuc *UserUseCase) AdminWithdrawPass(ctx context.Context, req *v1.AdminWithdrawPassRequest) (*v1.AdminWithdrawPassReply, error) {
-	var (
-		err error
-	)
+	//var (
+	//	err error
+	//)
 
-	res := &v1.AdminWithdrawPassReply{}
+	//res := &v1.AdminWithdrawPassReply{}
+	//
+	//_, err = uuc.ubRepo.UpdateWithdrawPass(ctx, req.SendBody.Id)
+	//if nil != err {
+	//	return res, err
+	//}
 
-	_, err = uuc.ubRepo.UpdateWithdrawPass(ctx, req.SendBody.Id)
-	if nil != err {
-		return res, err
-	}
-
-	return res, nil
+	return nil, nil
 }
 
 func (uuc *UserUseCase) AdminVipUpdate(ctx context.Context, req *v1.AdminVipUpdateRequest) (*v1.AdminVipUpdateReply, error) {

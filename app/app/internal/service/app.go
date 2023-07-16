@@ -924,12 +924,11 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 			continue
 		}
 
-		withDrawAmount := strconv.FormatInt(withdraw.RelAmount, 10) + "00000000" // 补八个0.系统基础1是10个0
+		withDrawAmount := strconv.FormatInt(withdraw.Amount, 10) + "00000000" // 补八个0.系统基础1是10个0
 
 		for i := 0; i < 3; i++ {
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
 			_, _, err = toToken("", users[withdraw.UserId].Address, withDrawAmount, tokenAddress)
-			fmt.Println(33331, err, users[withdraw.UserId].Address, withDrawAmount, tokenAddress)
 			if err == nil {
 				_, err = a.uuc.UpdateWithdrawSuccess(ctx, withdraw.ID)
 				//time.Sleep(3 * time.Second)
@@ -942,6 +941,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 				}
 				time.Sleep(7 * time.Second)
 			} else {
+				fmt.Println(33331, err, users[withdraw.UserId].Address, withDrawAmount, tokenAddress)
 				time.Sleep(3 * time.Second)
 			}
 		}
@@ -1011,7 +1011,6 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		for i := 0; i < 3; i++ {
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
 			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeCsd, "0x538aC017AA01bA9665052660EA5783Ba91A48092")
-			fmt.Println(33332, err)
 			if err == nil {
 				_, err = a.uuc.UpdateTrade(ctx, trade.ID)
 				//time.Sleep(3 * time.Second)
@@ -1024,6 +1023,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 				}
 				time.Sleep(7 * time.Second)
 			} else {
+				fmt.Println(33332, err)
 				time.Sleep(3 * time.Second)
 			}
 		}
@@ -1032,7 +1032,6 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		for i := 0; i < 3; i++ {
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
 			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeHbs, "0x0905397af05dd0bdf76690ff318b10c6216e3069")
-			fmt.Println(33334, err)
 			if err == nil {
 				_, err = a.uuc.UpdateTrade(ctx, trade.ID)
 				//time.Sleep(3 * time.Second)
@@ -1045,6 +1044,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 				}
 				time.Sleep(7 * time.Second)
 			} else {
+				fmt.Println(33334, err)
 				time.Sleep(3 * time.Second)
 			}
 		}

@@ -764,10 +764,8 @@ func (ui *UserInfoRepo) UpdateUserInfo2(ctx context.Context, u *biz.UserInfo) (*
 // UpdateUserInfoVip .
 func (ui *UserInfoRepo) UpdateUserInfoVip(ctx context.Context, userId, vip int64) (*biz.UserInfo, error) {
 	var userInfo UserInfo
-	userInfo.Vip = vip
-	userInfo.UseVip = 1
-
-	res := ui.data.DB(ctx).Table("user_info").Where("user_id=?", userId).Updates(&userInfo)
+	res := ui.data.DB(ctx).Table("user_info").Where("user_id=?", userId).Updates(
+		map[string]interface{}{"vip": vip, "use_vip": 1})
 	if res.Error != nil {
 		return nil, errors.New(500, "UPDATE_USER_INFO_ERROR", "用户信息修改失败")
 	}

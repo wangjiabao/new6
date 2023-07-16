@@ -142,6 +142,7 @@ type Reward struct {
 	ID               int64
 	UserId           int64
 	Amount           int64
+	AmountB          int64
 	BalanceRecordId  int64
 	Type             string
 	TypeRecordId     int64
@@ -241,6 +242,7 @@ type UserBalanceRepo interface {
 	UpdateWithdrawPass(ctx context.Context, id int64) (*Withdraw, error)
 	UserDailyBalanceReward(ctx context.Context, userId int64, rewardAmount int64, amount int64, amountDhb int64, status string) (int64, error)
 	GetBalanceRewardCurrent(ctx context.Context, now time.Time) ([]*BalanceReward, error)
+	GetUserTrades(ctx context.Context, b *Pagination, userId int64) ([]*Trade, error, int64)
 	UserDailyLocationReward(ctx context.Context, userId int64, rewardAmount int64, amount int64, coinAmount int64, status string, locationId int64) (int64, error)
 	DepositLastNew(ctx context.Context, userId int64, lastAmount int64, lastUsdtAmount int64, lastCoinAmount int64) (int64, error)
 	DepositLastNewDhb(ctx context.Context, userId int64, lastCoinAmount int64) error
@@ -436,9 +438,71 @@ func (uuc *UserUseCase) AdminRewardList(ctx context.Context, req *v1.AdminReward
 		res.Rewards = append(res.Rewards, &v1.AdminRewardListReply_List{
 			CreatedAt: vUserReward.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
 			Amount:    fmt.Sprintf("%.2f", float64(vUserReward.Amount)/float64(10000000000)),
+			AmountB:   fmt.Sprintf("%.2f", float64(vUserReward.AmountB)/float64(10000000000)),
 			Type:      vUserReward.Type,
 			Address:   tmpUser,
 			Reason:    vUserReward.Reason,
+		})
+	}
+
+	return res, nil
+}
+
+func (uuc *UserUseCase) AdminTradeList(ctx context.Context, req *v1.AdminTradeListRequest) (*v1.AdminTradeListReply, error) {
+	var (
+		userSearch *User
+		userId     int64 = 0
+		userTrades []*Trade
+		users      map[int64]*User
+		userIdsMap map[int64]int64
+		userIds    []int64
+		err        error
+		count      int64
+	)
+	res := &v1.AdminTradeListReply{
+		Trades: make([]*v1.AdminTradeListReply_List, 0),
+	}
+
+	// 地址查询
+	if "" != req.Address {
+		userSearch, err = uuc.repo.GetUserByAddress(ctx, req.Address)
+		if nil != err {
+			return res, nil
+		}
+		userId = userSearch.ID
+	}
+
+	userTrades, err, count = uuc.ubRepo.GetUserTrades(ctx, &Pagination{
+		PageNum:  int(req.Page),
+		PageSize: 10,
+	}, userId)
+	if nil != err {
+		return res, nil
+	}
+	res.Count = count
+
+	userIdsMap = make(map[int64]int64, 0)
+	for _, vUserReward := range userTrades {
+		userIdsMap[vUserReward.UserId] = vUserReward.UserId
+	}
+	for _, v := range userIdsMap {
+		userIds = append(userIds, v)
+	}
+
+	users, err = uuc.repo.GetUserByUserIds(ctx, userIds...)
+	for _, vUserReward := range userTrades {
+		tmpUser := ""
+		if nil != users {
+			if _, ok := users[vUserReward.UserId]; ok {
+				tmpUser = users[vUserReward.UserId].Address
+			}
+		}
+
+		res.Trades = append(res.Trades, &v1.AdminTradeListReply_List{
+			CreatedAt: vUserReward.CreatedAt.Add(8 * time.Hour).Format("2006-01-02 15:04:05"),
+			AmountCsd: fmt.Sprintf("%.2f", float64(vUserReward.AmountCsd)/float64(10000000000)),
+			AmountHbs: fmt.Sprintf("%.2f", float64(vUserReward.AmountHbs)/float64(10000000000)),
+			Address:   tmpUser,
 		})
 	}
 

@@ -2977,6 +2977,46 @@ func (ub *UserBalanceRepo) GetBalanceRewardCurrent(ctx context.Context, now time
 	return res, nil
 }
 
+// GetUserTrades .
+func (ub *UserBalanceRepo) GetUserTrades(ctx context.Context, b *biz.Pagination, userId int64) ([]*biz.Trade, error, int64) {
+	var (
+		trades []*Trade
+		count  int64
+	)
+	res := make([]*biz.Trade, 0)
+
+	instance := ub.data.db.Table("trade")
+
+	if 0 < userId {
+		instance = instance.Where("user_id=?", userId)
+	}
+
+	instance = instance.Count(&count)
+	if err := instance.Scopes(Paginate(b.PageNum, b.PageSize)).Order("id desc").Find(&trades).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return res, errors.NotFound("REWARD_NOT_FOUND", "reward not found"), 0
+		}
+
+		return nil, errors.New(500, "REWARD ERROR", err.Error()), 0
+	}
+
+	for _, v := range trades {
+		res = append(res, &biz.Trade{
+			ID:           v.ID,
+			UserId:       v.UserId,
+			AmountCsd:    v.AmountCsd,
+			RelAmountCsd: v.RelAmountCsd,
+			AmountHbs:    v.AmountHbs,
+			CsdReward:    v.CsdReward,
+			RelAmountHbs: v.RelAmountHbs,
+			Status:       v.Status,
+			CreatedAt:    v.CreatedAt,
+		})
+	}
+
+	return res, nil, count
+}
+
 // GetUserRewards .
 func (ub *UserBalanceRepo) GetUserRewards(ctx context.Context, b *biz.Pagination, userId int64, reason string) ([]*biz.Reward, error, int64) {
 	var (
@@ -3009,6 +3049,7 @@ func (ub *UserBalanceRepo) GetUserRewards(ctx context.Context, b *biz.Pagination
 			ID:               reward.ID,
 			UserId:           reward.UserId,
 			Amount:           reward.Amount,
+			AmountB:          reward.AmountB,
 			BalanceRecordId:  reward.BalanceRecordId,
 			Type:             reward.Type,
 			TypeRecordId:     reward.TypeRecordId,

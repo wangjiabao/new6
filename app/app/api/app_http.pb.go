@@ -41,6 +41,7 @@ const OperationAppAdminMonthRecommend = "/api.App/AdminMonthRecommend"
 const OperationAppAdminRecordList = "/api.App/AdminRecordList"
 const OperationAppAdminRewardList = "/api.App/AdminRewardList"
 const OperationAppAdminTrade = "/api.App/AdminTrade"
+const OperationAppAdminTradeList = "/api.App/AdminTradeList"
 const OperationAppAdminUndoUpdate = "/api.App/AdminUndoUpdate"
 const OperationAppAdminUserList = "/api.App/AdminUserList"
 const OperationAppAdminUserRecommend = "/api.App/AdminUserRecommend"
@@ -94,6 +95,7 @@ type AppHTTPServer interface {
 	AdminRecordList(context.Context, *RecordListRequest) (*RecordListReply, error)
 	AdminRewardList(context.Context, *AdminRewardListRequest) (*AdminRewardListReply, error)
 	AdminTrade(context.Context, *AdminTradeRequest) (*AdminTradeReply, error)
+	AdminTradeList(context.Context, *AdminTradeListRequest) (*AdminTradeListReply, error)
 	AdminUndoUpdate(context.Context, *AdminUndoUpdateRequest) (*AdminUndoUpdateReply, error)
 	AdminUserList(context.Context, *AdminUserListRequest) (*AdminUserListReply, error)
 	AdminUserRecommend(context.Context, *AdminUserRecommendRequest) (*AdminUserRecommendReply, error)
@@ -140,6 +142,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.GET("/api/admin_dhb/vip_check", _App_VipCheck0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/deposit_2", _App_Deposit20_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/reward_list", _App_AdminRewardList0_HTTP_Handler(srv))
+	r.GET("/api/admin_dhb/trade_list", _App_AdminTradeList0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/lock_system", _App_LockSystem0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/user_list", _App_AdminUserList0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/check_admin_user_area", _App_CheckAdminUserArea0_HTTP_Handler(srv))
@@ -426,6 +429,25 @@ func _App_AdminRewardList0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context
 			return err
 		}
 		reply := out.(*AdminRewardListReply)
+		return ctx.Result(200, reply)
+	}
+}
+
+func _App_AdminTradeList0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminTradeListRequest
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminTradeList)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminTradeList(ctx, req.(*AdminTradeListRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminTradeListReply)
 		return ctx.Result(200, reply)
 	}
 }
@@ -1211,6 +1233,7 @@ type AppHTTPClient interface {
 	AdminRecordList(ctx context.Context, req *RecordListRequest, opts ...http.CallOption) (rsp *RecordListReply, err error)
 	AdminRewardList(ctx context.Context, req *AdminRewardListRequest, opts ...http.CallOption) (rsp *AdminRewardListReply, err error)
 	AdminTrade(ctx context.Context, req *AdminTradeRequest, opts ...http.CallOption) (rsp *AdminTradeReply, err error)
+	AdminTradeList(ctx context.Context, req *AdminTradeListRequest, opts ...http.CallOption) (rsp *AdminTradeListReply, err error)
 	AdminUndoUpdate(ctx context.Context, req *AdminUndoUpdateRequest, opts ...http.CallOption) (rsp *AdminUndoUpdateReply, err error)
 	AdminUserList(ctx context.Context, req *AdminUserListRequest, opts ...http.CallOption) (rsp *AdminUserListReply, err error)
 	AdminUserRecommend(ctx context.Context, req *AdminUserRecommendRequest, opts ...http.CallOption) (rsp *AdminUserRecommendReply, err error)
@@ -1528,6 +1551,19 @@ func (c *AppHTTPClientImpl) AdminTrade(ctx context.Context, in *AdminTradeReques
 	pattern := "/api/admin_dhb/trade"
 	path := binding.EncodeURL(pattern, in, true)
 	opts = append(opts, http.Operation(OperationAppAdminTrade))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminTradeList(ctx context.Context, in *AdminTradeListRequest, opts ...http.CallOption) (*AdminTradeListReply, error) {
+	var out AdminTradeListReply
+	pattern := "/api/admin_dhb/trade_list"
+	path := binding.EncodeURL(pattern, in, true)
+	opts = append(opts, http.Operation(OperationAppAdminTradeList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
 	if err != nil {

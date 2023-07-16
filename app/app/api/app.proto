@@ -97,6 +97,12 @@ service App {
 		};
 	};
 
+	rpc AdminTradeList (AdminTradeListRequest) returns (AdminTradeListReply) {
+		option (google.api.http) = {
+			get: "/api/admin_dhb/trade_list"
+		};
+	};
+
 	rpc LockSystem (LockSystemRequest) returns (LockSystemReply) {
 		option (google.api.http) = {
 			get: "/api/admin_dhb/lock_system"
@@ -486,11 +492,29 @@ message AdminRewardListReply {
 	message List {
 		string created_at = 1;
 		string amount = 2;
+		string amountB = 3;
 		string type = 4;
 		string address = 5;
 		string reason = 6;
 	}
 	 int64 count = 2;
+}
+
+
+message AdminTradeListRequest {
+	int64 page = 1;
+	string address = 2;
+}
+
+message AdminTradeListReply {
+	repeated List trades = 1;
+	message List {
+		string created_at = 1;
+		string amountCsd = 2;
+		string amountHbs = 3;
+		string address = 5;
+	}
+	int64 count = 2;
 }
 
 message LockSystemRequest {

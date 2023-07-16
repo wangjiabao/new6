@@ -35,6 +35,7 @@ type AppClient interface {
 	VipCheck(ctx context.Context, in *VipCheckRequest, opts ...grpc.CallOption) (*VipCheckReply, error)
 	Deposit2(ctx context.Context, in *DepositRequest, opts ...grpc.CallOption) (*DepositReply, error)
 	AdminRewardList(ctx context.Context, in *AdminRewardListRequest, opts ...grpc.CallOption) (*AdminRewardListReply, error)
+	AdminTradeList(ctx context.Context, in *AdminTradeListRequest, opts ...grpc.CallOption) (*AdminTradeListReply, error)
 	LockSystem(ctx context.Context, in *LockSystemRequest, opts ...grpc.CallOption) (*LockSystemReply, error)
 	AdminUserList(ctx context.Context, in *AdminUserListRequest, opts ...grpc.CallOption) (*AdminUserListReply, error)
 	CheckAdminUserArea(ctx context.Context, in *CheckAdminUserAreaRequest, opts ...grpc.CallOption) (*CheckAdminUserAreaReply, error)
@@ -194,6 +195,15 @@ func (c *appClient) Deposit2(ctx context.Context, in *DepositRequest, opts ...gr
 func (c *appClient) AdminRewardList(ctx context.Context, in *AdminRewardListRequest, opts ...grpc.CallOption) (*AdminRewardListReply, error) {
 	out := new(AdminRewardListReply)
 	err := c.cc.Invoke(ctx, "/api.App/AdminRewardList", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *appClient) AdminTradeList(ctx context.Context, in *AdminTradeListRequest, opts ...grpc.CallOption) (*AdminTradeListReply, error) {
+	out := new(AdminTradeListReply)
+	err := c.cc.Invoke(ctx, "/api.App/AdminTradeList", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -559,6 +569,7 @@ type AppServer interface {
 	VipCheck(context.Context, *VipCheckRequest) (*VipCheckReply, error)
 	Deposit2(context.Context, *DepositRequest) (*DepositReply, error)
 	AdminRewardList(context.Context, *AdminRewardListRequest) (*AdminRewardListReply, error)
+	AdminTradeList(context.Context, *AdminTradeListRequest) (*AdminTradeListReply, error)
 	LockSystem(context.Context, *LockSystemRequest) (*LockSystemReply, error)
 	AdminUserList(context.Context, *AdminUserListRequest) (*AdminUserListReply, error)
 	CheckAdminUserArea(context.Context, *CheckAdminUserAreaRequest) (*CheckAdminUserAreaReply, error)
@@ -642,6 +653,9 @@ func (UnimplementedAppServer) Deposit2(context.Context, *DepositRequest) (*Depos
 }
 func (UnimplementedAppServer) AdminRewardList(context.Context, *AdminRewardListRequest) (*AdminRewardListReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminRewardList not implemented")
+}
+func (UnimplementedAppServer) AdminTradeList(context.Context, *AdminTradeListRequest) (*AdminTradeListReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminTradeList not implemented")
 }
 func (UnimplementedAppServer) LockSystem(context.Context, *LockSystemRequest) (*LockSystemReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LockSystem not implemented")
@@ -1000,6 +1014,24 @@ func _App_AdminRewardList_Handler(srv interface{}, ctx context.Context, dec func
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AppServer).AdminRewardList(ctx, req.(*AdminRewardListRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _App_AdminTradeList_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminTradeListRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminTradeList(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/AdminTradeList",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminTradeList(ctx, req.(*AdminTradeListRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1746,6 +1778,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminRewardList",
 			Handler:    _App_AdminRewardList_Handler,
+		},
+		{
+			MethodName: "AdminTradeList",
+			Handler:    _App_AdminTradeList_Handler,
 		},
 		{
 			MethodName: "LockSystem",

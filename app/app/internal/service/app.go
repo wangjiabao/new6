@@ -180,7 +180,7 @@ func (a *AppService) Deposit4(ctx context.Context, req *v1.DepositRequest) (*v1.
 
 	for i := 1; i <= 5; i++ {
 		// 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd
-		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x538ac017aa01ba9665052660ea5783ba91a48092")
+		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x68cAe2f51B2113e9709abF406AbA9a2b445D8F09")
 		if nil != err {
 			break
 		}
@@ -707,6 +707,10 @@ func (a *AppService) AdminRewardList(ctx context.Context, req *v1.AdminRewardLis
 	return a.uuc.AdminRewardList(ctx, req)
 }
 
+func (a *AppService) AdminTradeList(ctx context.Context, req *v1.AdminTradeListRequest) (*v1.AdminTradeListReply, error) {
+	return a.uuc.AdminTradeList(ctx, req)
+}
+
 func (a *AppService) AdminUserList(ctx context.Context, req *v1.AdminUserListRequest) (*v1.AdminUserListReply, error) {
 	return a.uuc.AdminUserList(ctx, req)
 }
@@ -908,7 +912,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 
 		if "usdt" == withdraw.Type {
 			//tokenAddress = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd"
-			tokenAddress = "0x0BAEfDB75cA6CA9A0d1685086829F3Ea9dDA9f5E"
+			tokenAddress = "0x68cAe2f51B2113e9709abF406AbA9a2b445D8F09"
 		} else if "dhb" == withdraw.Type {
 			tokenAddress = "0x0905397af05dd0bdf76690ff318b10c6216e3069"
 		} else {
@@ -1006,7 +1010,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 
 		for i := 0; i < 3; i++ {
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
-			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeCsd, "0x0BAEfDB75cA6CA9A0d1685086829F3Ea9dDA9f5E")
+			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeCsd, "0x68cAe2f51B2113e9709abF406AbA9a2b445D8F09")
 			fmt.Println(3333, err)
 			if err == nil {
 				_, err = a.uuc.UpdateTrade(ctx, trade.ID)

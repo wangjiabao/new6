@@ -759,6 +759,34 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/trade_list:
+        get:
+            tags:
+                - App
+            operationId: App_AdminTradeList
+            parameters:
+                - name: page
+                  in: query
+                  schema:
+                    type: integer
+                    format: int64
+                - name: address
+                  in: query
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminTradeListReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/undo_update:
         post:
             tags:
@@ -1423,11 +1451,34 @@ components:
                     type: string
                 amount:
                     type: string
+                amountB:
+                    type: string
                 type:
                     type: string
                 address:
                     type: string
                 reason:
+                    type: string
+        AdminTradeListReply:
+            type: object
+            properties:
+                trades:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AdminTradeListReply_List'
+                count:
+                    type: integer
+                    format: int64
+        AdminTradeListReply_List:
+            type: object
+            properties:
+                createdAt:
+                    type: string
+                amountCsd:
+                    type: string
+                amountHbs:
+                    type: string
+                address:
                     type: string
         AdminTradeReply:
             type: object

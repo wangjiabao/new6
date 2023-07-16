@@ -47,6 +47,7 @@ type UserInfo struct {
 	Vip              int64
 	HistoryRecommend int64
 	LockVip          int64
+	UseVip           int64
 	TeamCsdBalance   int64
 }
 
@@ -1676,6 +1677,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 		withdrawTeamVipFourthRate   int64
 		withdrawTeamVipFifthRate    int64
 		withdrawTeamVipLevelRate    int64
+		vip0Balance                 int64
 		err                         error
 	)
 	// 配置
@@ -1684,7 +1686,7 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 		"withdraw_team_vip_rate", "withdraw_team_vip_second_rate",
 		"withdraw_team_vip_third_rate", "withdraw_team_vip_fourth_rate",
 		"withdraw_team_vip_fifth_rate", "withdraw_team_vip_level_rate",
-		"withdraw_destroy_rate",
+		"withdraw_destroy_rate", "vip_0_balance",
 	)
 	if nil != configs {
 		for _, vConfig := range configs {
@@ -1706,6 +1708,8 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 				withdrawTeamVipFifthRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			} else if "withdraw_team_vip_level_rate" == vConfig.KeyName {
 				withdrawTeamVipLevelRate, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "vip_0_balance" == vConfig.KeyName {
+				vip0Balance, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			}
 		}
 	}
@@ -1864,6 +1868,18 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 
 			if 0 == i { // 当前用户被此人直推
 
+				if 0 == myUserTopRecommendUserInfo.UseVip {
+					var userBalance *UserBalance
+					userBalance, err = uuc.ubRepo.GetUserBalance(ctx, myUserTopRecommendUserInfo.UserId)
+					if nil != err {
+						continue
+					}
+
+					if userBalance.BalanceUsdt/10000000000 < vip0Balance {
+						continue
+					}
+				}
+
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 					_, err = uuc.ubRepo.WithdrawNewRewardRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendRate/100, rewardAmountDhb*withdrawRecommendRate/100, withdraw.ID, tmpRecommendUserIdsInt)
 					if nil != err {
@@ -1877,6 +1893,18 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 
 				continue
 			} else if 1 == i { // 间接推
+				if 0 == myUserTopRecommendUserInfo.UseVip {
+					var userBalance *UserBalance
+					userBalance, err = uuc.ubRepo.GetUserBalance(ctx, myUserTopRecommendUserInfo.UserId)
+					if nil != err {
+						continue
+					}
+
+					if userBalance.BalanceUsdt/10000000000 < vip0Balance {
+						continue
+					}
+				}
+
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
 					_, err = uuc.ubRepo.WithdrawNewRewardSecondRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawRecommendSecondRate/100, rewardAmountDhb*withdrawRecommendSecondRate/100, withdraw.ID, tmpRecommendUserIdsInt)
 					if nil != err {
@@ -2746,6 +2774,7 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 		vip3Balance     int64
 		vip2Balance     int64
 		vip1Balance     int64
+		vip0Balance     int64
 		vip5BalanceTeam int64
 		vip4BalanceTeam int64
 		vip3BalanceTeam int64
@@ -2759,7 +2788,7 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 	}
 
 	configs, _ = uuc.configRepo.GetConfigByKeys(ctx, "vip_5_balance",
-		"vip_4_balance", "vip_3_balance", "vip_2_balance", "vip_1_balance",
+		"vip_4_balance", "vip_3_balance", "vip_2_balance", "vip_1_balance", "vip_0_balance",
 		"vip_5_balance_team", "vip_4_balance_team", "vip_3_balance_team", "vip_2_balance_team", "vip_1_balance_team")
 	if nil != configs {
 		for _, vConfig := range configs {
@@ -2771,6 +2800,8 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 				vip3Balance, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			} else if "vip_2_balance" == vConfig.KeyName {
 				vip2Balance, _ = strconv.ParseInt(vConfig.Value, 10, 64)
+			} else if "vip_0_balance" == vConfig.KeyName {
+				vip0Balance, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			} else if "vip_1_balance" == vConfig.KeyName {
 				vip1Balance, _ = strconv.ParseInt(vConfig.Value, 10, 64)
 			} else if "vip_4_balance_team" == vConfig.KeyName {
@@ -2798,17 +2829,13 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 			myCode         string
 			teamCsdBalance int64
 			myUserBalance  int64
-			myVip          int64 = 1
+			myVip          int64 = 0
 		)
 
 		vip1Count1 := make(map[int64]int64, 0)
 		vip2Count1 := make(map[int64]int64, 0)
 		vip3Count1 := make(map[int64]int64, 0)
 		vip4Count1 := make(map[int64]int64, 0)
-
-		if 1 > user.Vip {
-			continue
-		}
 
 		userRecommend, err = uuc.urRepo.GetUserRecommendByUserId(ctx, user.ID)
 		if nil != err {
@@ -2923,6 +2950,8 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 			myVip = 3
 		} else if teamCsdBalance >= vip1BalanceTeam && 2 <= user.HistoryRecommend && myUserBalance >= vip1Balance {
 			myVip = 2
+		} else if myUserBalance >= vip0Balance {
+			myVip = 1
 		}
 
 		if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务

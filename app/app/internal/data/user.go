@@ -33,6 +33,7 @@ type UserInfo struct {
 	Vip              int64     `gorm:"type:int;not null"`
 	HistoryRecommend int64     `gorm:"type:int;not null"`
 	LockVip          int64     `gorm:"type:int;not null"`
+	UseVip           int64     `gorm:"type:int;not null"`
 	TeamCsdBalance   int64     `gorm:"type:bigint;not null"`
 	CreatedAt        time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt        time.Time `gorm:"type:datetime;not null"`
@@ -385,6 +386,7 @@ func (ui *UserInfoRepo) GetUserInfoByUserId(ctx context.Context, userId int64) (
 		UserId:           userInfo.UserId,
 		Vip:              userInfo.Vip,
 		HistoryRecommend: userInfo.HistoryRecommend,
+		UseVip:           userInfo.UseVip,
 	}, nil
 }
 
@@ -496,7 +498,7 @@ func (u *UserRepo) GetAllUsers(ctx context.Context) ([]*biz.User, error) {
 // GetAllUserInfos .
 func (u *UserRepo) GetAllUserInfos(ctx context.Context) ([]*biz.UserInfo, error) {
 	var users []*UserInfo
-	if err := u.data.db.Table("user_info").Order("id desc").Find(&users).Error; err != nil {
+	if err := u.data.db.Table("user_info").Where("use_vip=?", 1).Order("id desc").Find(&users).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, errors.NotFound("USER_NOT_FOUND", "user not found")
 		}
@@ -763,6 +765,7 @@ func (ui *UserInfoRepo) UpdateUserInfo2(ctx context.Context, u *biz.UserInfo) (*
 func (ui *UserInfoRepo) UpdateUserInfoVip(ctx context.Context, userId, vip int64) (*biz.UserInfo, error) {
 	var userInfo UserInfo
 	userInfo.Vip = vip
+	userInfo.UseVip = 1
 
 	res := ui.data.DB(ctx).Table("user_info").Where("user_id=?", userId).Updates(&userInfo)
 	if res.Error != nil {

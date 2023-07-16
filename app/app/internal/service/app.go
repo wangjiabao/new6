@@ -925,10 +925,10 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		}
 
 		withDrawAmount := strconv.FormatInt(withdraw.Amount, 10) + "00000000" // 补八个0.系统基础1是10个0
-
-		for i := 0; i < 3; i++ {
+		tmpUrl1 := "https://bsc-dataseed4.binance.org/"
+		for i := 0; i < 5; i++ {
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
-			_, _, err = toToken("", users[withdraw.UserId].Address, withDrawAmount, tokenAddress)
+			_, _, err = toToken("", users[withdraw.UserId].Address, withDrawAmount, tokenAddress, tmpUrl1)
 			if err == nil {
 				_, err = a.uuc.UpdateWithdrawSuccess(ctx, withdraw.ID)
 				//time.Sleep(3 * time.Second)
@@ -941,6 +941,20 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 				}
 				time.Sleep(7 * time.Second)
 			} else {
+				fmt.Println(err)
+				if 0 == i {
+					tmpUrl1 = "https://bsc-dataseed1.binance.org"
+				} else if 1 == i {
+					tmpUrl1 = "https://bsc-dataseed4.binance.org"
+				} else if 2 == i {
+					tmpUrl1 = "https://bsc-dataseed2.binance.org"
+				} else if 3 == i {
+					tmpUrl1 = "https://bsc-dataseed3.binance.org"
+				} else if 4 == i {
+					tmpUrl1 = "https://bnb-bscnews.rpc.blxrbdn.com/"
+				} else if 5 == i {
+					tmpUrl1 = "https://bsc-dataseed.binance.org"
+				}
 				fmt.Println(33331, err, users[withdraw.UserId].Address, withDrawAmount, tokenAddress)
 				time.Sleep(3 * time.Second)
 			}
@@ -1009,8 +1023,9 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		tradeCsd := strconv.FormatInt(trade.AmountCsd/100*withdrawDestoryRate, 10) + "00000000" // 补八个0.系统基础1是10个0
 
 		for i := 0; i < 3; i++ {
+			tmpUrl1 := "https://bsc-dataseed4.binance.org/"
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
-			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeCsd, "0x538aC017AA01bA9665052660EA5783Ba91A48092")
+			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeCsd, "0x538aC017AA01bA9665052660EA5783Ba91A48092", tmpUrl1)
 			if err == nil {
 				_, err = a.uuc.UpdateTrade(ctx, trade.ID)
 				//time.Sleep(3 * time.Second)
@@ -1023,6 +1038,19 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 				}
 				time.Sleep(7 * time.Second)
 			} else {
+				if 0 == i {
+					tmpUrl1 = "https://bsc-dataseed1.binance.org"
+				} else if 1 == i {
+					tmpUrl1 = "https://bsc-dataseed4.binance.org"
+				} else if 2 == i {
+					tmpUrl1 = "https://bsc-dataseed2.binance.org"
+				} else if 3 == i {
+					tmpUrl1 = "https://bsc-dataseed3.binance.org"
+				} else if 4 == i {
+					tmpUrl1 = "https://bnb-bscnews.rpc.blxrbdn.com/"
+				} else if 5 == i {
+					tmpUrl1 = "https://bsc-dataseed.binance.org"
+				}
 				fmt.Println(33332, err)
 				time.Sleep(3 * time.Second)
 			}
@@ -1030,8 +1058,9 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 
 		tradeHbs := strconv.FormatInt(trade.AmountHbs/100*withdrawDestoryRate, 10) + "00000000" // 补八个0.系统基础1是10个0
 		for i := 0; i < 3; i++ {
+			tmpUrl1 := "https://bsc-dataseed4.binance.org/"
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
-			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeHbs, "0x0905397af05dd0bdf76690ff318b10c6216e3069")
+			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeHbs, "0x0905397af05dd0bdf76690ff318b10c6216e3069", tmpUrl1)
 			if err == nil {
 				_, err = a.uuc.UpdateTrade(ctx, trade.ID)
 				//time.Sleep(3 * time.Second)
@@ -1044,6 +1073,19 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 				}
 				time.Sleep(7 * time.Second)
 			} else {
+				if 0 == i {
+					tmpUrl1 = "https://bsc-dataseed1.binance.org"
+				} else if 1 == i {
+					tmpUrl1 = "https://bsc-dataseed4.binance.org"
+				} else if 2 == i {
+					tmpUrl1 = "https://bsc-dataseed2.binance.org"
+				} else if 3 == i {
+					tmpUrl1 = "https://bsc-dataseed3.binance.org"
+				} else if 4 == i {
+					tmpUrl1 = "https://bnb-bscnews.rpc.blxrbdn.com/"
+				} else if 5 == i {
+					tmpUrl1 = "https://bsc-dataseed.binance.org"
+				}
 				fmt.Println(33334, err)
 				time.Sleep(3 * time.Second)
 			}
@@ -1100,9 +1142,9 @@ func toBnB(toAccount string, fromPrivateKey string, toAmount int64) (bool, strin
 	return true, signedTx.Hash().Hex(), nil
 }
 
-func toToken(userPrivateKey string, toAccount string, withdrawAmount string, withdrawTokenAddress string) (bool, string, error) {
+func toToken(userPrivateKey string, toAccount string, withdrawAmount string, withdrawTokenAddress string, url1 string) (bool, string, error) {
 	//client, err := ethclient.Dial("https://data-seed-prebsc-1-s3.binance.org:8545/")
-	client, err := ethclient.Dial("https://bsc-dataseed.binance.org/")
+	client, err := ethclient.Dial(url1)
 	if err != nil {
 		return false, "", err
 	}

@@ -1868,16 +1868,14 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 
 			if 0 == i { // 当前用户被此人直推
 
-				if 0 == myUserTopRecommendUserInfo.UseVip {
-					var userBalance *UserBalance
-					userBalance, err = uuc.ubRepo.GetUserBalance(ctx, myUserTopRecommendUserInfo.UserId)
-					if nil != err {
-						continue
-					}
+				var userBalance *UserBalance
+				userBalance, err = uuc.ubRepo.GetUserBalance(ctx, myUserTopRecommendUserInfo.UserId)
+				if nil != err {
+					continue
+				}
 
-					if userBalance.BalanceUsdt/10000000000 < vip0Balance {
-						continue
-					}
+				if userBalance.BalanceUsdt/10000000000 < vip0Balance {
+					continue
 				}
 
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
@@ -1893,16 +1891,14 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 
 				continue
 			} else if 1 == i { // 间接推
-				if 0 == myUserTopRecommendUserInfo.UseVip {
-					var userBalance *UserBalance
-					userBalance, err = uuc.ubRepo.GetUserBalance(ctx, myUserTopRecommendUserInfo.UserId)
-					if nil != err {
-						continue
-					}
+				var userBalance *UserBalance
+				userBalance, err = uuc.ubRepo.GetUserBalance(ctx, myUserTopRecommendUserInfo.UserId)
+				if nil != err {
+					continue
+				}
 
-					if userBalance.BalanceUsdt/10000000000 < vip0Balance {
-						continue
-					}
+				if userBalance.BalanceUsdt/10000000000 < vip0Balance {
+					continue
 				}
 
 				if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务

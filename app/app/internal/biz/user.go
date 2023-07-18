@@ -1780,7 +1780,12 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 		}
 
 		lastVip := int64(1)
-		levelRewardCount := 5
+		level1RewardCount := 5
+		level2RewardCount := 5
+		level3RewardCount := 5
+		level4RewardCount := 5
+		level5RewardCount := 5
+
 		withdrawTeamVip := int64(0)
 		levelOk := 0
 		for i := 0; i <= lastKey; i++ {
@@ -1848,21 +1853,50 @@ func (uuc *UserUseCase) AdminTrade(ctx context.Context, req *v1.AdminTradeReques
 				}
 
 				// 平级奖
-				if 0 < levelOk && lastVip == myUserTopRecommendUserInfo.Vip && 0 < levelRewardCount { // 上一个是vip1和以上且和我平级
-					levelRewardCount--
-					if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
-						_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, rewardAmountDhb*withdrawTeamVipLevelRate/100, withdraw.ID, tmpRecommendUserIdsInt)
-						if nil != err {
-							return err
+				if 0 < levelOk && lastVip == myUserTopRecommendUserInfo.Vip { // 上一个是vip1和以上且和我平级
+					tmpCurrent := 0
+					if 2 == myUserTopRecommendUserInfo.Vip {
+						if 0 < level1RewardCount {
+							tmpCurrent = level1RewardCount
+							level1RewardCount--
 						}
-
-						return nil
-					}); nil != err {
-						continue
+					} else if 3 == myUserTopRecommendUserInfo.Vip {
+						if 0 < level2RewardCount {
+							tmpCurrent = level2RewardCount
+							level2RewardCount--
+						}
+					} else if 4 == myUserTopRecommendUserInfo.Vip {
+						if 0 < level3RewardCount {
+							tmpCurrent = level3RewardCount
+							level3RewardCount--
+						}
+					} else if 5 == myUserTopRecommendUserInfo.Vip {
+						if 0 < level4RewardCount {
+							tmpCurrent = level4RewardCount
+							level4RewardCount--
+						}
+					} else if 6 == myUserTopRecommendUserInfo.Vip {
+						if 0 < level5RewardCount {
+							tmpCurrent = level5RewardCount
+							level5RewardCount--
+						}
 					}
 
-					lastVip = myUserTopRecommendUserInfo.Vip
-					continue
+					if 0 < tmpCurrent {
+						if err = uuc.tx.ExecTx(ctx, func(ctx context.Context) error { // 事务
+							_, err = uuc.ubRepo.WithdrawNewRewardLevelRecommend(ctx, myUserTopRecommendUserInfo.UserId, rewardAmount*withdrawTeamVipLevelRate/100, rewardAmountDhb*withdrawTeamVipLevelRate/100, withdraw.ID, tmpRecommendUserIdsInt)
+							if nil != err {
+								return err
+							}
+
+							return nil
+						}); nil != err {
+							continue
+						}
+
+						lastVip = myUserTopRecommendUserInfo.Vip
+						continue
+					}
 				}
 			}
 

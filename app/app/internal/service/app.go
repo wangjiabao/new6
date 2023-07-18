@@ -816,6 +816,10 @@ func (a *AppService) AdminList(ctx context.Context, req *v1.AdminListRequest) (*
 	return a.uuc.AdminList(ctx, req)
 }
 
+func (a *AppService) AdminUserPasswordUpdate(ctx context.Context, req *v1.AdminPasswordUpdateRequest) (*v1.AdminPasswordUpdateReply, error) {
+	return a.uuc.AdminPasswordUpdate(ctx, req)
+}
+
 func (a *AppService) AdminVipUpdate(ctx context.Context, req *v1.AdminVipUpdateRequest) (*v1.AdminVipUpdateReply, error) {
 	return a.uuc.AdminVipUpdate(ctx, req)
 }

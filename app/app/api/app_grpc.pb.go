@@ -55,6 +55,7 @@ type AppClient interface {
 	AdminMonthRecommend(ctx context.Context, in *AdminMonthRecommendRequest, opts ...grpc.CallOption) (*AdminMonthRecommendReply, error)
 	AdminConfig(ctx context.Context, in *AdminConfigRequest, opts ...grpc.CallOption) (*AdminConfigReply, error)
 	AdminConfigUpdate(ctx context.Context, in *AdminConfigUpdateRequest, opts ...grpc.CallOption) (*AdminConfigUpdateReply, error)
+	AdminUserPasswordUpdate(ctx context.Context, in *AdminPasswordUpdateRequest, opts ...grpc.CallOption) (*AdminPasswordUpdateReply, error)
 	AdminVipUpdate(ctx context.Context, in *AdminVipUpdateRequest, opts ...grpc.CallOption) (*AdminVipUpdateReply, error)
 	AdminUndoUpdate(ctx context.Context, in *AdminUndoUpdateRequest, opts ...grpc.CallOption) (*AdminUndoUpdateReply, error)
 	AdminAreaLevelUpdate(ctx context.Context, in *AdminAreaLevelUpdateRequest, opts ...grpc.CallOption) (*AdminAreaLevelUpdateReply, error)
@@ -381,6 +382,15 @@ func (c *appClient) AdminConfigUpdate(ctx context.Context, in *AdminConfigUpdate
 	return out, nil
 }
 
+func (c *appClient) AdminUserPasswordUpdate(ctx context.Context, in *AdminPasswordUpdateRequest, opts ...grpc.CallOption) (*AdminPasswordUpdateReply, error) {
+	out := new(AdminPasswordUpdateReply)
+	err := c.cc.Invoke(ctx, "/api.App/AdminUserPasswordUpdate", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *appClient) AdminVipUpdate(ctx context.Context, in *AdminVipUpdateRequest, opts ...grpc.CallOption) (*AdminVipUpdateReply, error) {
 	out := new(AdminVipUpdateReply)
 	err := c.cc.Invoke(ctx, "/api.App/AdminVipUpdate", in, out, opts...)
@@ -589,6 +599,7 @@ type AppServer interface {
 	AdminMonthRecommend(context.Context, *AdminMonthRecommendRequest) (*AdminMonthRecommendReply, error)
 	AdminConfig(context.Context, *AdminConfigRequest) (*AdminConfigReply, error)
 	AdminConfigUpdate(context.Context, *AdminConfigUpdateRequest) (*AdminConfigUpdateReply, error)
+	AdminUserPasswordUpdate(context.Context, *AdminPasswordUpdateRequest) (*AdminPasswordUpdateReply, error)
 	AdminVipUpdate(context.Context, *AdminVipUpdateRequest) (*AdminVipUpdateReply, error)
 	AdminUndoUpdate(context.Context, *AdminUndoUpdateRequest) (*AdminUndoUpdateReply, error)
 	AdminAreaLevelUpdate(context.Context, *AdminAreaLevelUpdateRequest) (*AdminAreaLevelUpdateReply, error)
@@ -713,6 +724,9 @@ func (UnimplementedAppServer) AdminConfig(context.Context, *AdminConfigRequest) 
 }
 func (UnimplementedAppServer) AdminConfigUpdate(context.Context, *AdminConfigUpdateRequest) (*AdminConfigUpdateReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminConfigUpdate not implemented")
+}
+func (UnimplementedAppServer) AdminUserPasswordUpdate(context.Context, *AdminPasswordUpdateRequest) (*AdminPasswordUpdateReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminUserPasswordUpdate not implemented")
 }
 func (UnimplementedAppServer) AdminVipUpdate(context.Context, *AdminVipUpdateRequest) (*AdminVipUpdateReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminVipUpdate not implemented")
@@ -1378,6 +1392,24 @@ func _App_AdminConfigUpdate_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _App_AdminUserPasswordUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminPasswordUpdateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminUserPasswordUpdate(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/AdminUserPasswordUpdate",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminUserPasswordUpdate(ctx, req.(*AdminPasswordUpdateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _App_AdminVipUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AdminVipUpdateRequest)
 	if err := dec(in); err != nil {
@@ -1858,6 +1890,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminConfigUpdate",
 			Handler:    _App_AdminConfigUpdate_Handler,
+		},
+		{
+			MethodName: "AdminUserPasswordUpdate",
+			Handler:    _App_AdminUserPasswordUpdate_Handler,
 		},
 		{
 			MethodName: "AdminVipUpdate",

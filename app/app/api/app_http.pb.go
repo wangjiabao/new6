@@ -44,6 +44,7 @@ const OperationAppAdminTrade = "/api.App/AdminTrade"
 const OperationAppAdminTradeList = "/api.App/AdminTradeList"
 const OperationAppAdminUndoUpdate = "/api.App/AdminUndoUpdate"
 const OperationAppAdminUserList = "/api.App/AdminUserList"
+const OperationAppAdminUserPasswordUpdate = "/api.App/AdminUserPasswordUpdate"
 const OperationAppAdminUserRecommend = "/api.App/AdminUserRecommend"
 const OperationAppAdminVipUpdate = "/api.App/AdminVipUpdate"
 const OperationAppAdminWithdraw = "/api.App/AdminWithdraw"
@@ -98,6 +99,7 @@ type AppHTTPServer interface {
 	AdminTradeList(context.Context, *AdminTradeListRequest) (*AdminTradeListReply, error)
 	AdminUndoUpdate(context.Context, *AdminUndoUpdateRequest) (*AdminUndoUpdateReply, error)
 	AdminUserList(context.Context, *AdminUserListRequest) (*AdminUserListReply, error)
+	AdminUserPasswordUpdate(context.Context, *AdminPasswordUpdateRequest) (*AdminPasswordUpdateReply, error)
 	AdminUserRecommend(context.Context, *AdminUserRecommendRequest) (*AdminUserRecommendReply, error)
 	AdminVipUpdate(context.Context, *AdminVipUpdateRequest) (*AdminVipUpdateReply, error)
 	AdminWithdraw(context.Context, *AdminWithdrawRequest) (*AdminWithdrawReply, error)
@@ -162,6 +164,7 @@ func RegisterAppHTTPServer(s *http.Server, srv AppHTTPServer) {
 	r.GET("/api/admin_dhb/month_recommend", _App_AdminMonthRecommend0_HTTP_Handler(srv))
 	r.GET("/api/admin_dhb/config", _App_AdminConfig0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/config_update", _App_AdminConfigUpdate0_HTTP_Handler(srv))
+	r.POST("/api/admin_dhb/password_update", _App_AdminUserPasswordUpdate0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/vip_update", _App_AdminVipUpdate0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/undo_update", _App_AdminUndoUpdate0_HTTP_Handler(srv))
 	r.POST("/api/admin_dhb/level_update", _App_AdminAreaLevelUpdate0_HTTP_Handler(srv))
@@ -819,6 +822,28 @@ func _App_AdminConfigUpdate0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Conte
 	}
 }
 
+func _App_AdminUserPasswordUpdate0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
+	return func(ctx http.Context) error {
+		var in AdminPasswordUpdateRequest
+		if err := ctx.Bind(&in.SendBody); err != nil {
+			return err
+		}
+		if err := ctx.BindQuery(&in); err != nil {
+			return err
+		}
+		http.SetOperation(ctx, OperationAppAdminUserPasswordUpdate)
+		h := ctx.Middleware(func(ctx context.Context, req interface{}) (interface{}, error) {
+			return srv.AdminUserPasswordUpdate(ctx, req.(*AdminPasswordUpdateRequest))
+		})
+		out, err := h(ctx, &in)
+		if err != nil {
+			return err
+		}
+		reply := out.(*AdminPasswordUpdateReply)
+		return ctx.Result(200, reply)
+	}
+}
+
 func _App_AdminVipUpdate0_HTTP_Handler(srv AppHTTPServer) func(ctx http.Context) error {
 	return func(ctx http.Context) error {
 		var in AdminVipUpdateRequest
@@ -1236,6 +1261,7 @@ type AppHTTPClient interface {
 	AdminTradeList(ctx context.Context, req *AdminTradeListRequest, opts ...http.CallOption) (rsp *AdminTradeListReply, err error)
 	AdminUndoUpdate(ctx context.Context, req *AdminUndoUpdateRequest, opts ...http.CallOption) (rsp *AdminUndoUpdateReply, err error)
 	AdminUserList(ctx context.Context, req *AdminUserListRequest, opts ...http.CallOption) (rsp *AdminUserListReply, err error)
+	AdminUserPasswordUpdate(ctx context.Context, req *AdminPasswordUpdateRequest, opts ...http.CallOption) (rsp *AdminPasswordUpdateReply, err error)
 	AdminUserRecommend(ctx context.Context, req *AdminUserRecommendRequest, opts ...http.CallOption) (rsp *AdminUserRecommendReply, err error)
 	AdminVipUpdate(ctx context.Context, req *AdminVipUpdateRequest, opts ...http.CallOption) (rsp *AdminVipUpdateReply, err error)
 	AdminWithdraw(ctx context.Context, req *AdminWithdrawRequest, opts ...http.CallOption) (rsp *AdminWithdrawReply, err error)
@@ -1592,6 +1618,19 @@ func (c *AppHTTPClientImpl) AdminUserList(ctx context.Context, in *AdminUserList
 	opts = append(opts, http.Operation(OperationAppAdminUserList))
 	opts = append(opts, http.PathTemplate(pattern))
 	err := c.cc.Invoke(ctx, "GET", path, nil, &out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return &out, err
+}
+
+func (c *AppHTTPClientImpl) AdminUserPasswordUpdate(ctx context.Context, in *AdminPasswordUpdateRequest, opts ...http.CallOption) (*AdminPasswordUpdateReply, error) {
+	var out AdminPasswordUpdateReply
+	pattern := "/api/admin_dhb/password_update"
+	path := binding.EncodeURL(pattern, in, false)
+	opts = append(opts, http.Operation(OperationAppAdminUserPasswordUpdate))
+	opts = append(opts, http.PathTemplate(pattern))
+	err := c.cc.Invoke(ctx, "POST", path, in.SendBody, &out, opts...)
 	if err != nil {
 		return nil, err
 	}

@@ -219,6 +219,13 @@ service App {
 		};
 	};
 
+	rpc AdminUserPasswordUpdate (AdminPasswordUpdateRequest) returns (AdminPasswordUpdateReply) {
+		option (google.api.http) = {
+			post: "/api/admin_dhb/password_update"
+			body: "send_body"
+		};
+	};
+
 	rpc AdminVipUpdate (AdminVipUpdateRequest) returns (AdminVipUpdateReply) {
 		option (google.api.http) = {
 			post: "/api/admin_dhb/vip_update"
@@ -813,6 +820,19 @@ message AdminConfigUpdateRequest {
 }
 
 message AdminConfigUpdateReply {
+
+}
+
+message AdminPasswordUpdateRequest {
+	message SendBody{
+		int64 user_id = 1;
+		string password = 2;
+	}
+
+	SendBody send_body = 1;
+}
+
+message AdminPasswordUpdateReply {
 
 }
 

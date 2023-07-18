@@ -8077,6 +8077,239 @@ var _ interface {
 	ErrorName() string
 } = AdminConfigUpdateReplyValidationError{}
 
+// Validate checks the field values on AdminPasswordUpdateRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *AdminPasswordUpdateRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AdminPasswordUpdateRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// AdminPasswordUpdateRequestMultiError, or nil if none found.
+func (m *AdminPasswordUpdateRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminPasswordUpdateRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetSendBody()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, AdminPasswordUpdateRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, AdminPasswordUpdateRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetSendBody()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AdminPasswordUpdateRequestValidationError{
+				field:  "SendBody",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return AdminPasswordUpdateRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminPasswordUpdateRequestMultiError is an error wrapping multiple
+// validation errors returned by AdminPasswordUpdateRequest.ValidateAll() if
+// the designated constraints aren't met.
+type AdminPasswordUpdateRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminPasswordUpdateRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminPasswordUpdateRequestMultiError) AllErrors() []error { return m }
+
+// AdminPasswordUpdateRequestValidationError is the validation error returned
+// by AdminPasswordUpdateRequest.Validate if the designated constraints aren't met.
+type AdminPasswordUpdateRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminPasswordUpdateRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminPasswordUpdateRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminPasswordUpdateRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminPasswordUpdateRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminPasswordUpdateRequestValidationError) ErrorName() string {
+	return "AdminPasswordUpdateRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AdminPasswordUpdateRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminPasswordUpdateRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminPasswordUpdateRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminPasswordUpdateRequestValidationError{}
+
+// Validate checks the field values on AdminPasswordUpdateReply with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *AdminPasswordUpdateReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AdminPasswordUpdateReply with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// AdminPasswordUpdateReplyMultiError, or nil if none found.
+func (m *AdminPasswordUpdateReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminPasswordUpdateReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return AdminPasswordUpdateReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminPasswordUpdateReplyMultiError is an error wrapping multiple validation
+// errors returned by AdminPasswordUpdateReply.ValidateAll() if the designated
+// constraints aren't met.
+type AdminPasswordUpdateReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminPasswordUpdateReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminPasswordUpdateReplyMultiError) AllErrors() []error { return m }
+
+// AdminPasswordUpdateReplyValidationError is the validation error returned by
+// AdminPasswordUpdateReply.Validate if the designated constraints aren't met.
+type AdminPasswordUpdateReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminPasswordUpdateReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminPasswordUpdateReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminPasswordUpdateReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminPasswordUpdateReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminPasswordUpdateReplyValidationError) ErrorName() string {
+	return "AdminPasswordUpdateReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AdminPasswordUpdateReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminPasswordUpdateReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminPasswordUpdateReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminPasswordUpdateReplyValidationError{}
+
 // Validate checks the field values on AdminVipUpdateRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -14001,6 +14234,115 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = AdminConfigUpdateRequest_SendBodyValidationError{}
+
+// Validate checks the field values on AdminPasswordUpdateRequest_SendBody with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *AdminPasswordUpdateRequest_SendBody) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AdminPasswordUpdateRequest_SendBody
+// with the rules defined in the proto definition for this message. If any
+// rules are violated, the result is a list of violation errors wrapped in
+// AdminPasswordUpdateRequest_SendBodyMultiError, or nil if none found.
+func (m *AdminPasswordUpdateRequest_SendBody) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminPasswordUpdateRequest_SendBody) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UserId
+
+	// no validation rules for Password
+
+	if len(errors) > 0 {
+		return AdminPasswordUpdateRequest_SendBodyMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminPasswordUpdateRequest_SendBodyMultiError is an error wrapping multiple
+// validation errors returned by
+// AdminPasswordUpdateRequest_SendBody.ValidateAll() if the designated
+// constraints aren't met.
+type AdminPasswordUpdateRequest_SendBodyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminPasswordUpdateRequest_SendBodyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminPasswordUpdateRequest_SendBodyMultiError) AllErrors() []error { return m }
+
+// AdminPasswordUpdateRequest_SendBodyValidationError is the validation error
+// returned by AdminPasswordUpdateRequest_SendBody.Validate if the designated
+// constraints aren't met.
+type AdminPasswordUpdateRequest_SendBodyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminPasswordUpdateRequest_SendBodyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminPasswordUpdateRequest_SendBodyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminPasswordUpdateRequest_SendBodyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminPasswordUpdateRequest_SendBodyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminPasswordUpdateRequest_SendBodyValidationError) ErrorName() string {
+	return "AdminPasswordUpdateRequest_SendBodyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AdminPasswordUpdateRequest_SendBodyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminPasswordUpdateRequest_SendBody.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminPasswordUpdateRequest_SendBodyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminPasswordUpdateRequest_SendBodyValidationError{}
 
 // Validate checks the field values on AdminVipUpdateRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are

@@ -681,6 +681,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/password_update:
+        post:
+            tags:
+                - App
+            operationId: App_AdminUserPasswordUpdate
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminPasswordUpdateRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminPasswordUpdateReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/record_list:
         get:
             tags:
@@ -1433,6 +1457,17 @@ components:
                     type: integer
                     format: int64
                 createdAt:
+                    type: string
+        AdminPasswordUpdateReply:
+            type: object
+            properties: {}
+        AdminPasswordUpdateRequest_SendBody:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: int64
+                password:
                     type: string
         AdminRewardListReply:
             type: object

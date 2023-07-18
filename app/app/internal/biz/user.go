@@ -285,6 +285,7 @@ type UserCurrentMonthRecommendRepo interface {
 type UserInfoRepo interface {
 	CreateUserInfo(ctx context.Context, u *User) (*UserInfo, error)
 	GetUserInfoByUserId(ctx context.Context, userId int64) (*UserInfo, error)
+	UpdateUserPassword(ctx context.Context, userId int64, password string) (*User, error)
 	UpdateUserInfo(ctx context.Context, u *UserInfo) (*UserInfo, error)
 	UpdateUserInfo2(ctx context.Context, u *UserInfo) (*UserInfo, error)
 	UpdateUserInfoVip(ctx context.Context, userId, vip int64) (*UserInfo, error)
@@ -1094,6 +1095,12 @@ func (uuc *UserUseCase) AdminWithdrawPass(ctx context.Context, req *v1.AdminWith
 	//}
 
 	return nil, nil
+}
+
+func (uuc *UserUseCase) AdminPasswordUpdate(ctx context.Context, req *v1.AdminPasswordUpdateRequest) (*v1.AdminPasswordUpdateReply, error) {
+
+	_, _ = uuc.uiRepo.UpdateUserPassword(ctx, req.SendBody.UserId, req.SendBody.Password)
+	return &v1.AdminPasswordUpdateReply{}, nil
 }
 
 func (uuc *UserUseCase) AdminVipUpdate(ctx context.Context, req *v1.AdminVipUpdateRequest) (*v1.AdminVipUpdateReply, error) {

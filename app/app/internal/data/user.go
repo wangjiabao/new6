@@ -13,6 +13,7 @@ import (
 type User struct {
 	ID        int64     `gorm:"primarykey;type:int"`
 	Address   string    `gorm:"type:varchar(100)"`
+	Password  string    `gorm:"type:varchar(100)"`
 	CreatedAt time.Time `gorm:"type:datetime;not null"`
 	UpdatedAt time.Time `gorm:"type:datetime;not null"`
 }
@@ -721,6 +722,18 @@ func (ui *UserInfoRepo) CreateUserInfo(ctx context.Context, u *biz.User) (*biz.U
 		Vip:              0,
 		HistoryRecommend: 0,
 	}, nil
+}
+
+// UpdateUserPassword .
+func (ui *UserInfoRepo) UpdateUserPassword(ctx context.Context, userId int64, password string) (*biz.User, error) {
+	var user User
+	user.Password = password
+	res := ui.data.DB(ctx).Table("user").Where("id=?", userId).Updates(&user)
+	if res.Error != nil {
+		return nil, errors.New(500, "UPDATE_USER_INFO_ERROR", "用户信息修改失败")
+	}
+
+	return nil, nil
 }
 
 // UpdateUserInfo .

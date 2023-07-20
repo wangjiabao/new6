@@ -574,6 +574,7 @@ message AdminUserListReply { // 用户信息
 message RecordListRequest {
 	int64 page = 1;
 	string address = 2;
+	string coinType = 3;
 }
 
 message RecordListReply { // 投资列表
@@ -704,6 +705,8 @@ message AdminAllReply {
 	string todayWithdrawH = 16; // 今日提币hbs金额
 	string withdrawH = 19; // hbs总提
 	string totalC = 20; // csd充值
+	string amountCsd = 21; // csd的销毁
+	string amountHbs = 22; // hbs的销毁
 	string allWithdrawBtc = 12;
 	string todayWithdrawBtc = 11;
 	string allReward = 8; //

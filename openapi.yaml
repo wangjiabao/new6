@@ -720,6 +720,10 @@ paths:
                   in: query
                   schema:
                     type: string
+                - name: coinType
+                  in: query
+                  schema:
+                    type: string
             responses:
                 "200":
                     description: OK
@@ -1240,6 +1244,10 @@ components:
                 withdrawH:
                     type: string
                 totalC:
+                    type: string
+                amountCsd:
+                    type: string
+                amountHbs:
                     type: string
                 allWithdrawBtc:
                     type: string

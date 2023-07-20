@@ -217,6 +217,8 @@ type UserBalanceRepo interface {
 	GetWithdrawPassOrRewarded(ctx context.Context) ([]*Withdraw, error)
 	GetWithdrawPassOrRewardedFirst(ctx context.Context) (*Withdraw, error)
 	GetTradeOk(ctx context.Context) (*Trade, error)
+	GetTradeOkkCsd(ctx context.Context) (int64, error)
+	GetTradeOkkHbs(ctx context.Context) (int64, error)
 	UpdateWithdraw(ctx context.Context, id int64, status string) (*Withdraw, error)
 	GetWithdrawById(ctx context.Context, id int64) (*Withdraw, error)
 	GetWithdrawNotDeal(ctx context.Context) ([]*Withdraw, error)
@@ -686,7 +688,7 @@ func (uuc *UserUseCase) AdminRecordList(ctx context.Context, req *v1.RecordListR
 	locations, err, count = uuc.locationRepo.GetUserBalanceRecords(ctx, &Pagination{
 		PageNum:  int(req.Page),
 		PageSize: 10,
-	}, userId)
+	}, userId, req.CoinType)
 	if nil != err {
 		return res, nil
 	}
@@ -1626,6 +1628,8 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 		userBalanceRecordHbsTotal       int64
 		userBalanceRecordCsdTotal       int64
 		balanceReward                   int64
+		amountCsd                       int64
+		amountHbs                       int64
 	)
 	userCount, _ = uuc.repo.GetUserCount(ctx)
 	userTodayCount, _ = uuc.repo.GetUserCountToday(ctx)
@@ -1644,11 +1648,15 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 	userLocationCount = uuc.locationRepo.GetLocationUserCount(ctx)
 	//balanceRewardRewarded, _ = uuc.ubRepo.GetUserRewardBalanceRewardTotal(ctx)
 	balanceReward, _ = uuc.ubRepo.GetBalanceRewardTotal(ctx)
+	amountCsd, _ = uuc.ubRepo.GetTradeOkkCsd(ctx)
+	amountHbs, _ = uuc.ubRepo.GetTradeOkkHbs(ctx)
 
 	return &v1.AdminAllReply{
 		TodayTotalUser:        userTodayCount,
 		TotalUser:             userCount,
 		LocationCount:         userLocationCount,
+		AmountHbs:             fmt.Sprintf("%.2f", float64(amountHbs*1/100)/float64(10000000000)),
+		AmountCsd:             fmt.Sprintf("%.2f", float64(amountCsd*1/100)/float64(10000000000)),
 		AllBalance:            fmt.Sprintf("%.2f", float64(userBalanceUsdtTotal)/float64(10000000000)),
 		TodayLocation:         fmt.Sprintf("%.2f", float64(userBalanceRecordUsdtTotalToday)/float64(10000000000)),
 		TotalH:                fmt.Sprintf("%.2f", float64(userBalanceRecordHbsTotal)/float64(10000000000)),

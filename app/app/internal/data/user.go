@@ -624,7 +624,7 @@ func (u *UserRepo) GetUsers(ctx context.Context, b *biz.Pagination, address stri
 	}
 
 	if 0 < vip {
-		instance = instance.Joins("inner join user_area on user.id = user_area.user_id and user_area.level=?", vip)
+		instance = instance.Joins("inner join user_info on user.id = user_info.user_id and user_info.vip=?", vip)
 	}
 
 	instance = instance.Count(&count)
@@ -1666,6 +1666,34 @@ func (ub *UserBalanceRepo) GetTradeOk(ctx context.Context) (*biz.Trade, error) {
 		Status:       trade.Status,
 		CreatedAt:    trade.CreatedAt,
 	}, nil
+}
+
+// GetTradeOkkCsd .
+func (ub *UserBalanceRepo) GetTradeOkkCsd(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Where("status=?", "okk").Table("trade").Select("sum(amount_csd) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
+// GetTradeOkkHbs .
+func (ub *UserBalanceRepo) GetTradeOkkHbs(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Where("status=?", "okk").Table("trade").Select("sum(amount_hbs) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE ERROR", err.Error())
+	}
+
+	return total.Total, nil
 }
 
 // GetTradeNotDeal .

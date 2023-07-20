@@ -3730,6 +3730,8 @@ func (m *RecordListRequest) validate(all bool) error {
 
 	// no validation rules for Address
 
+	// no validation rules for CoinType
+
 	if len(errors) > 0 {
 		return RecordListRequestMultiError(errors)
 	}
@@ -6079,6 +6081,10 @@ func (m *AdminAllReply) validate(all bool) error {
 	// no validation rules for WithdrawH
 
 	// no validation rules for TotalC
+
+	// no validation rules for AmountCsd
+
+	// no validation rules for AmountHbs
 
 	// no validation rules for AllWithdrawBtc
 

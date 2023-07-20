@@ -77,11 +77,21 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 	//}
 
 	for i := 1; i <= 5; i++ {
-		// 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd
-		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955")
+		depositUsdtResult, err = requestEthDepositResult(200, int64(i),
+			"0x55d398326f99059fF775485246999027B3197955",
+			"0xda9ad2a567f9f341fab8b6772b38fddf412174e0",
+		)
 		if nil != err {
 			break
 		}
+
+		//depositUsdtResult2, err = requestEthDepositResult(200, int64(i),
+		//	"0x55d398326f99059fF775485246999027B3197955",
+		//	"0x983a6385bbac74476d538ad6961920925b617335",
+		//)
+		//if nil != err {
+		//	break
+		//}
 
 		now := time.Now().UTC()
 		fmt.Println(now, end)
@@ -93,10 +103,20 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 			break
 		}
 
+		//if 0 >= len(depositUsdtResult2) {
+		//	break
+		//}
+
 		for hashKey, vDepositResult := range depositUsdtResult { // 主查询
+
 			hashKeys = append(hashKeys, hashKey)
 			fromAccount = append(fromAccount, vDepositResult.From)
 		}
+
+		//for hashKey2, vDepositResult2 := range depositUsdtResult2 { // 主查询
+		//	hashKeys = append(hashKeys, hashKey2)
+		//	fromAccount = append(fromAccount, vDepositResult2.From)
+		//}
 
 		depositUsers, err = a.uuc.GetUserByAddress(ctx, fromAccount...)
 		if nil != depositUsers {
@@ -110,6 +130,20 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 				if _, ok := depositUsers[vDepositUsdtResult.From]; !ok { // 用户不存在
 					continue
 				}
+
+				//var tmp *eth
+				//for _, vDepositUsdtResult2 := range depositUsdtResult2 {
+				//	if _, ok := existEthUserRecords[vDepositUsdtResult2.Hash]; ok { // 记录已存在
+				//		continue
+				//	}
+				//	if _, ok := depositUsers[vDepositUsdtResult2.From]; !ok { // 用户不存在
+				//		continue
+				//	}
+				//
+				//	if vDepositUsdtResult2.From == vDepositUsdtResult.From && vDepositUsdtResult2.Value == vDepositUsdtResult.Value {
+				//		tmp = vDepositUsdtResult2
+				//	}
+				//}
 
 				lenValue := len(vDepositUsdtResult.Value)
 				if 18 > lenValue {
@@ -126,6 +160,8 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 				if int64(10000000000) > tmpValue { // 1000000000000
 					continue
 				}
+
+				tmpValue = tmpValue / 300 * 1000
 
 				notExistDepositResult = append(notExistDepositResult, &biz.EthUserRecord{ // 两种币的记录
 					UserId:    depositUsers[vDepositUsdtResult.From].ID,
@@ -180,7 +216,8 @@ func (a *AppService) Deposit4(ctx context.Context, req *v1.DepositRequest) (*v1.
 
 	for i := 1; i <= 5; i++ {
 		// 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd
-		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x538aC017AA01bA9665052660EA5783Ba91A48092")
+		depositUsdtResult, err = requestEthDepositResult(200, int64(i),
+			"0xfad476cd33ed9213ed0a2f4c20f6865a98bf0a8b", "0x89c2fa5e5518870fd1fc1f6a1f33cd557c07d3bb")
 		if nil != err {
 			break
 		}
@@ -228,6 +265,8 @@ func (a *AppService) Deposit4(ctx context.Context, req *v1.DepositRequest) (*v1.
 				if int64(10000000000) > tmpValue { // 1000000000000
 					continue
 				}
+
+				tmpValue = tmpValue / 300 * 1000
 
 				notExistDepositResult = append(notExistDepositResult, &biz.EthUserRecord{ // 两种币的记录
 					UserId:    depositUsers[vDepositUsdtResult.From].ID,
@@ -282,7 +321,7 @@ func (a *AppService) Deposit3(ctx context.Context, req *v1.DepositRequest) (*v1.
 
 	for i := 1; i <= 5; i++ {
 		// 0x337610d27c682E347C9cD60BD4b3b107C9d34dDd
-		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x0905397af05dd0bdf76690ff318b10c6216e3069")
+		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x0905397af05dd0bdf76690ff318b10c6216e3069", "0x983a6385bbac74476d538ad6961920925b617335")
 		if nil != err {
 			break
 		}
@@ -330,6 +369,8 @@ func (a *AppService) Deposit3(ctx context.Context, req *v1.DepositRequest) (*v1.
 				if int64(10000000000) > tmpValue { // 1000000000000
 					continue
 				}
+
+				tmpValue = tmpValue / 300 * 1000
 
 				notExistDepositResult = append(notExistDepositResult, &biz.EthUserRecord{ // 两种币的记录
 					UserId:    depositUsers[vDepositUsdtResult.From].ID,
@@ -405,7 +446,7 @@ func (a *AppService) Deposit2(ctx context.Context, req *v1.DepositRequest) (*v1.
 		}
 
 		//depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955")
-		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955")
+		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955", "0xda9ad2a567f9f341fab8b6772b38fddf412174e0")
 		if nil != err {
 			break
 		}
@@ -543,7 +584,7 @@ type eth struct {
 	To          string
 }
 
-func requestEthDepositResult(offset int64, page int64, contractAddress string) (map[string]*eth, error) {
+func requestEthDepositResult(offset int64, page int64, contractAddress string, address string) (map[string]*eth, error) {
 	//apiUrl := "https://api-testnet.bscscan.com/api"
 	apiUrl := "https://api.bscscan.com/api"
 	// URL param
@@ -552,7 +593,7 @@ func requestEthDepositResult(offset int64, page int64, contractAddress string) (
 	data.Set("action", "tokentx")
 	data.Set("contractaddress", contractAddress)
 	data.Set("apikey", "CRCSHR2G3WXB1MET3BNA7ZQKQVSNXFYX18")
-	data.Set("address", "0xbfcf7e804e31d8253ff1315d969e7f62d166947f")
+	data.Set("address", address)
 	data.Set("sort", "desc")
 	data.Set("offset", strconv.FormatInt(offset, 10))
 	data.Set("page", strconv.FormatInt(page, 10))
@@ -596,7 +637,7 @@ func requestEthDepositResult(offset int64, page int64, contractAddress string) (
 
 	res := make(map[string]*eth, 0)
 	for _, v := range i.Result {
-		if "0xbfcf7e804e31d8253ff1315d969e7f62d166947f" == v.To { // 接收者
+		if address == v.To { // 接收者
 			res[v.Hash] = v
 		}
 	}
@@ -916,7 +957,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 
 		if "usdt" == withdraw.Type {
 			//tokenAddress = "0x337610d27c682E347C9cD60BD4b3b107C9d34dDd"
-			tokenAddress = "0x538aC017AA01bA9665052660EA5783Ba91A48092"
+			tokenAddress = "0xfad476cd33ed9213ed0a2f4c20f6865a98bf0a8b"
 		} else if "dhb" == withdraw.Type {
 			tokenAddress = "0x0905397af05dd0bdf76690ff318b10c6216e3069"
 		} else {
@@ -1027,7 +1068,7 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 		for i := 0; i <= 5; i++ {
 			tmpUrl1 := "https://bsc-dataseed4.binance.org/"
 			//fmt.Println(11111, user.ToAddress, v.Amount, balanceInt)
-			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeCsd, "0x538aC017AA01bA9665052660EA5783Ba91A48092", tmpUrl1)
+			_, _, err = toToken("", "0x0000000000000000000000000000000000000001", tradeCsd, "0xfad476cd33ed9213ed0a2f4c20f6865a98bf0a8b", tmpUrl1)
 			if err == nil {
 				_, err = a.uuc.UpdateTrade(ctx, trade.ID)
 				//time.Sleep(3 * time.Second)

@@ -1285,6 +1285,10 @@ components:
                     type: string
                 balanceRewardRewarded:
                     type: string
+                userBalanceLockUsdtTotal:
+                    type: string
+                userLocationNewCurrent:
+                    type: string
         AdminAreaLevelUpdateReply:
             type: object
             properties: {}

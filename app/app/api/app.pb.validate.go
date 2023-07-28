@@ -6098,6 +6098,10 @@ func (m *AdminAllReply) validate(all bool) error {
 
 	// no validation rules for BalanceRewardRewarded
 
+	// no validation rules for UserBalanceLockUsdtTotal
+
+	// no validation rules for UserLocationNewCurrent
+
 	if len(errors) > 0 {
 		return AdminAllReplyMultiError(errors)
 	}

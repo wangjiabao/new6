@@ -3317,6 +3317,48 @@ func (ub UserBalanceRepo) GetUserBalanceLockUsdtTotal(ctx context.Context) (int6
 	return total.Total, nil
 }
 
+// GetUserLocationNewCurrentMaxNew .
+func (ub UserBalanceRepo) GetUserLocationNewCurrentMaxNew(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Table("location_new").Select("sum(current_max_new) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
+// GetUserLocationNewCurrentMax .
+func (ub UserBalanceRepo) GetUserLocationNewCurrentMax(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Table("location_new").Select("sum(current_max) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
+// GetUserLocationNewCurrent .
+func (ub UserBalanceRepo) GetUserLocationNewCurrent(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Table("location_new").Select("sum(current) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
 // GetUserBalanceDHBTotal .
 func (ub UserBalanceRepo) GetUserBalanceDHBTotal(ctx context.Context) (int64, error) {
 	var total UserBalanceTotal

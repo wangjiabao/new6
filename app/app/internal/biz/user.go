@@ -209,6 +209,9 @@ type UserBalanceRepo interface {
 	GetUserBalanceLockByUserIds(ctx context.Context, userIds ...int64) (map[int64]*UserBalance, error)
 	GetUserBalanceUsdtTotal(ctx context.Context) (int64, error)
 	GetUserBalanceLockUsdtTotal(ctx context.Context) (int64, error)
+	GetUserLocationNewCurrentMaxNew(ctx context.Context) (int64, error)
+	GetUserLocationNewCurrentMax(ctx context.Context) (int64, error)
+	GetUserLocationNewCurrent(ctx context.Context) (int64, error)
 	GetUserBalanceDHBTotal(ctx context.Context) (int64, error)
 	GreateWithdraw(ctx context.Context, userId int64, amount int64, coinType string) (*Withdraw, error)
 	WithdrawUsdt(ctx context.Context, userId int64, amount int64) error
@@ -1630,6 +1633,10 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 		balanceRewardRewarded           int64
 		userBalanceRecordHbsTotal       int64
 		userBalanceRecordCsdTotal       int64
+		userLocationNewCurrentMaxNew    int64
+		userLocationNewCurrentMax       int64
+		userLocationNewCurrent          int64
+		tmpUserLocationNewCurrent       int64
 		balanceReward                   int64
 		amountCsd                       int64
 		amountHbs                       int64
@@ -1638,6 +1645,10 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 	userTodayCount, _ = uuc.repo.GetUserCountToday(ctx)
 	userBalanceUsdtTotal, _ = uuc.ubRepo.GetUserBalanceUsdtTotal(ctx)
 	userBalanceDhbTotal, _ = uuc.ubRepo.GetUserBalanceDHBTotal(ctx)
+	userLocationNewCurrentMaxNew, _ = uuc.ubRepo.GetUserLocationNewCurrentMaxNew(ctx)
+	userLocationNewCurrentMax, _ = uuc.ubRepo.GetUserLocationNewCurrentMax(ctx)
+	userLocationNewCurrent, _ = uuc.ubRepo.GetUserLocationNewCurrent(ctx)
+	tmpUserLocationNewCurrent = userLocationNewCurrentMaxNew/100000000 + userLocationNewCurrentMax/100000000 - userLocationNewCurrent/100000000
 	userBalanceLockUsdtTotal, _ = uuc.ubRepo.GetUserBalanceLockUsdtTotal(ctx)
 	userBalanceRecordUsdtTotal, _ = uuc.ubRepo.GetUserBalanceRecordUsdtTotal(ctx)
 	userBalanceRecordHbsTotal, _ = uuc.ubRepo.GetUserBalanceRecordHbsTotal(ctx)
@@ -1656,25 +1667,27 @@ func (uuc *UserUseCase) AdminAll(ctx context.Context, req *v1.AdminAllRequest) (
 	amountHbs, _ = uuc.ubRepo.GetTradeOkkHbs(ctx)
 
 	return &v1.AdminAllReply{
-		TodayTotalUser:        userTodayCount,
-		TotalUser:             userCount,
-		LocationCount:         userLocationCount,
-		AmountHbs:             fmt.Sprintf("%.2f", float64(amountHbs*1/100)/float64(10000000000)),
-		AmountCsd:             fmt.Sprintf("%.2f", float64(amountCsd*1/100)/float64(10000000000)),
-		AllBalance:            fmt.Sprintf("%.2f", float64(userBalanceUsdtTotal)/float64(10000000000)),
-		TodayLocation:         fmt.Sprintf("%.2f", float64(userBalanceRecordUsdtTotalToday)/float64(10000000000)),
-		TotalH:                fmt.Sprintf("%.2f", float64(userBalanceRecordHbsTotal)/float64(10000000000)),
-		AllLocation:           fmt.Sprintf("%.2f", float64(userBalanceRecordUsdtTotal)/float64(10000000000)),
-		TotalC:                fmt.Sprintf("%.2f", float64(userBalanceRecordCsdTotal)/float64(10000000000)),
-		TodayWithdraw:         fmt.Sprintf("%.2f", float64(userWithdrawUsdtTotalToday)/float64(10000000000)),
-		AllWithdraw:           fmt.Sprintf("%.2f", float64(userWithdrawUsdtTotal)/float64(10000000000)),
-		AllReward:             fmt.Sprintf("%.2f", float64(userRewardUsdtTotal)/float64(10000000000)),
-		AllSystemRewardAndFee: fmt.Sprintf("%.2f", float64(systemRewardUsdtTotal)/float64(10000000000)),
-		AllBalanceH:           fmt.Sprintf("%.2f", float64(userBalanceDhbTotal)/float64(10000000000)),
-		TodayWithdrawH:        fmt.Sprintf("%.2f", float64(userWithdrawDhbTotalToday)/float64(10000000000)),
-		WithdrawH:             fmt.Sprintf("%.2f", float64(userWithdrawDhbTotal)/float64(10000000000)),
-		BalanceReward:         fmt.Sprintf("%.2f", float64(balanceReward)/float64(10000000000)),
-		BalanceRewardRewarded: fmt.Sprintf("%.2f", float64(balanceRewardRewarded)/float64(10000000000)),
+		TodayTotalUser:           userTodayCount,
+		TotalUser:                userCount,
+		LocationCount:            userLocationCount,
+		AmountHbs:                fmt.Sprintf("%.2f", float64(amountHbs*1/100)/float64(10000000000)),
+		AmountCsd:                fmt.Sprintf("%.2f", float64(amountCsd*1/100)/float64(10000000000)),
+		AllBalance:               fmt.Sprintf("%.2f", float64(userBalanceUsdtTotal)/float64(10000000000)),
+		TodayLocation:            fmt.Sprintf("%.2f", float64(userBalanceRecordUsdtTotalToday)/float64(10000000000)),
+		TotalH:                   fmt.Sprintf("%.2f", float64(userBalanceRecordHbsTotal)/float64(10000000000)),
+		AllLocation:              fmt.Sprintf("%.2f", float64(userBalanceRecordUsdtTotal)/float64(10000000000)),
+		TotalC:                   fmt.Sprintf("%.2f", float64(userBalanceRecordCsdTotal)/float64(10000000000)),
+		TodayWithdraw:            fmt.Sprintf("%.2f", float64(userWithdrawUsdtTotalToday)/float64(10000000000)),
+		AllWithdraw:              fmt.Sprintf("%.2f", float64(userWithdrawUsdtTotal)/float64(10000000000)),
+		AllReward:                fmt.Sprintf("%.2f", float64(userRewardUsdtTotal)/float64(10000000000)),
+		AllSystemRewardAndFee:    fmt.Sprintf("%.2f", float64(systemRewardUsdtTotal)/float64(10000000000)),
+		AllBalanceH:              fmt.Sprintf("%.2f", float64(userBalanceDhbTotal)/float64(10000000000)),
+		TodayWithdrawH:           fmt.Sprintf("%.2f", float64(userWithdrawDhbTotalToday)/float64(10000000000)),
+		WithdrawH:                fmt.Sprintf("%.2f", float64(userWithdrawDhbTotal)/float64(10000000000)),
+		BalanceReward:            fmt.Sprintf("%.2f", float64(balanceReward)/float64(10000000000)),
+		BalanceRewardRewarded:    fmt.Sprintf("%.2f", float64(balanceRewardRewarded)/float64(10000000000)),
+		UserBalanceLockUsdtTotal: fmt.Sprintf("%.2f", float64(userBalanceLockUsdtTotal)/float64(10000000000)),
+		UserLocationNewCurrent:   fmt.Sprintf("%.2f", float64(tmpUserLocationNewCurrent)/float64(100)),
 	}, nil
 }
 

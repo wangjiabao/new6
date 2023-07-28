@@ -720,6 +720,7 @@ message AdminAllReply {
 	string allSystemRewardAndFee = 9;
 	string balanceReward = 14;
 	string balanceRewardRewarded = 15;
+	string userBalanceLockUsdtTotal = 16;
 }
 
 message AdminUserRecommendRequest {

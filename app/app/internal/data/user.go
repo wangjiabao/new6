@@ -3303,6 +3303,20 @@ func (ub UserBalanceRepo) GetUserBalanceUsdtTotal(ctx context.Context) (int64, e
 	return total.Total, nil
 }
 
+// GetUserBalanceLockUsdtTotal .
+func (ub UserBalanceRepo) GetUserBalanceLockUsdtTotal(ctx context.Context) (int64, error) {
+	var total UserBalanceTotal
+	if err := ub.data.db.Table("user_balance_lock").Select("sum(balance_usdt) as total").Take(&total).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return total.Total, errors.NotFound("USER_BALANCE_NOT_FOUND", "user balance not found")
+		}
+
+		return total.Total, errors.New(500, "USER BALANCE ERROR", err.Error())
+	}
+
+	return total.Total, nil
+}
+
 // GetUserBalanceDHBTotal .
 func (ub UserBalanceRepo) GetUserBalanceDHBTotal(ctx context.Context) (int64, error) {
 	var total UserBalanceTotal

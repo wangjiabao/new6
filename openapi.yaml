@@ -24,6 +24,30 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/Status'
+    /api/admin_dhb/admin_update_location_new_max:
+        post:
+            tags:
+                - App
+            operationId: App_AdminUpdateLocationNewMax
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AdminUpdateLocationNewMaxRequest_SendBody'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AdminUpdateLocationNewMaxReply'
+                default:
+                    description: Default error response
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/Status'
     /api/admin_dhb/all:
         get:
             tags:
@@ -1538,6 +1562,17 @@ components:
                 undo:
                     type: integer
                     format: int64
+        AdminUpdateLocationNewMaxReply:
+            type: object
+            properties: {}
+        AdminUpdateLocationNewMaxRequest_SendBody:
+            type: object
+            properties:
+                userId:
+                    type: integer
+                    format: int64
+                amount:
+                    type: string
         AdminUserListReply:
             type: object
             properties:

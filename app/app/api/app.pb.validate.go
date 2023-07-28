@@ -8316,6 +8316,243 @@ var _ interface {
 	ErrorName() string
 } = AdminPasswordUpdateReplyValidationError{}
 
+// Validate checks the field values on AdminUpdateLocationNewMaxRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the first error encountered is returned, or nil if there are
+// no violations.
+func (m *AdminUpdateLocationNewMaxRequest) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AdminUpdateLocationNewMaxRequest with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// AdminUpdateLocationNewMaxRequestMultiError, or nil if none found.
+func (m *AdminUpdateLocationNewMaxRequest) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminUpdateLocationNewMaxRequest) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetSendBody()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, AdminUpdateLocationNewMaxRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, AdminUpdateLocationNewMaxRequestValidationError{
+					field:  "SendBody",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetSendBody()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return AdminUpdateLocationNewMaxRequestValidationError{
+				field:  "SendBody",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return AdminUpdateLocationNewMaxRequestMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminUpdateLocationNewMaxRequestMultiError is an error wrapping multiple
+// validation errors returned by
+// AdminUpdateLocationNewMaxRequest.ValidateAll() if the designated
+// constraints aren't met.
+type AdminUpdateLocationNewMaxRequestMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminUpdateLocationNewMaxRequestMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminUpdateLocationNewMaxRequestMultiError) AllErrors() []error { return m }
+
+// AdminUpdateLocationNewMaxRequestValidationError is the validation error
+// returned by AdminUpdateLocationNewMaxRequest.Validate if the designated
+// constraints aren't met.
+type AdminUpdateLocationNewMaxRequestValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminUpdateLocationNewMaxRequestValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminUpdateLocationNewMaxRequestValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminUpdateLocationNewMaxRequestValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminUpdateLocationNewMaxRequestValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminUpdateLocationNewMaxRequestValidationError) ErrorName() string {
+	return "AdminUpdateLocationNewMaxRequestValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AdminUpdateLocationNewMaxRequestValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminUpdateLocationNewMaxRequest.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminUpdateLocationNewMaxRequestValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminUpdateLocationNewMaxRequestValidationError{}
+
+// Validate checks the field values on AdminUpdateLocationNewMaxReply with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *AdminUpdateLocationNewMaxReply) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on AdminUpdateLocationNewMaxReply with
+// the rules defined in the proto definition for this message. If any rules
+// are violated, the result is a list of violation errors wrapped in
+// AdminUpdateLocationNewMaxReplyMultiError, or nil if none found.
+func (m *AdminUpdateLocationNewMaxReply) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminUpdateLocationNewMaxReply) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if len(errors) > 0 {
+		return AdminUpdateLocationNewMaxReplyMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminUpdateLocationNewMaxReplyMultiError is an error wrapping multiple
+// validation errors returned by AdminUpdateLocationNewMaxReply.ValidateAll()
+// if the designated constraints aren't met.
+type AdminUpdateLocationNewMaxReplyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminUpdateLocationNewMaxReplyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminUpdateLocationNewMaxReplyMultiError) AllErrors() []error { return m }
+
+// AdminUpdateLocationNewMaxReplyValidationError is the validation error
+// returned by AdminUpdateLocationNewMaxReply.Validate if the designated
+// constraints aren't met.
+type AdminUpdateLocationNewMaxReplyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminUpdateLocationNewMaxReplyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminUpdateLocationNewMaxReplyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminUpdateLocationNewMaxReplyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminUpdateLocationNewMaxReplyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminUpdateLocationNewMaxReplyValidationError) ErrorName() string {
+	return "AdminUpdateLocationNewMaxReplyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AdminUpdateLocationNewMaxReplyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminUpdateLocationNewMaxReply.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminUpdateLocationNewMaxReplyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminUpdateLocationNewMaxReplyValidationError{}
+
 // Validate checks the field values on AdminVipUpdateRequest with the rules
 // defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
@@ -14349,6 +14586,116 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = AdminPasswordUpdateRequest_SendBodyValidationError{}
+
+// Validate checks the field values on
+// AdminUpdateLocationNewMaxRequest_SendBody with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *AdminUpdateLocationNewMaxRequest_SendBody) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on
+// AdminUpdateLocationNewMaxRequest_SendBody with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in
+// AdminUpdateLocationNewMaxRequest_SendBodyMultiError, or nil if none found.
+func (m *AdminUpdateLocationNewMaxRequest_SendBody) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *AdminUpdateLocationNewMaxRequest_SendBody) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UserId
+
+	// no validation rules for Amount
+
+	if len(errors) > 0 {
+		return AdminUpdateLocationNewMaxRequest_SendBodyMultiError(errors)
+	}
+
+	return nil
+}
+
+// AdminUpdateLocationNewMaxRequest_SendBodyMultiError is an error wrapping
+// multiple validation errors returned by
+// AdminUpdateLocationNewMaxRequest_SendBody.ValidateAll() if the designated
+// constraints aren't met.
+type AdminUpdateLocationNewMaxRequest_SendBodyMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m AdminUpdateLocationNewMaxRequest_SendBodyMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m AdminUpdateLocationNewMaxRequest_SendBodyMultiError) AllErrors() []error { return m }
+
+// AdminUpdateLocationNewMaxRequest_SendBodyValidationError is the validation
+// error returned by AdminUpdateLocationNewMaxRequest_SendBody.Validate if the
+// designated constraints aren't met.
+type AdminUpdateLocationNewMaxRequest_SendBodyValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e AdminUpdateLocationNewMaxRequest_SendBodyValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e AdminUpdateLocationNewMaxRequest_SendBodyValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e AdminUpdateLocationNewMaxRequest_SendBodyValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e AdminUpdateLocationNewMaxRequest_SendBodyValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e AdminUpdateLocationNewMaxRequest_SendBodyValidationError) ErrorName() string {
+	return "AdminUpdateLocationNewMaxRequest_SendBodyValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e AdminUpdateLocationNewMaxRequest_SendBodyValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sAdminUpdateLocationNewMaxRequest_SendBody.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = AdminUpdateLocationNewMaxRequest_SendBodyValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = AdminUpdateLocationNewMaxRequest_SendBodyValidationError{}
 
 // Validate checks the field values on AdminVipUpdateRequest_SendBody with the
 // rules defined in the proto definition for this message. If any rules are

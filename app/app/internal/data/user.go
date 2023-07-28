@@ -2715,6 +2715,28 @@ func (ub *UserBalanceRepo) WithdrawNewRewardRecommend(ctx context.Context, userI
 	return 0, nil
 }
 
+// UpdateLocationNewMax .
+func (ub *UserBalanceRepo) UpdateLocationNewMax(ctx context.Context, userId int64, amount int64) (int64, error) {
+	var err error
+	var location LocationNew
+	if err = ub.data.db.Table("location_new").Where("user_id", userId).Order("id desc").First(&location).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return 0, errors.NotFound("LOCATION_NOT_FOUND", "location not found")
+		}
+
+		return 0, errors.New(500, "LOCATION ERROR", err.Error())
+	}
+
+	res := ub.data.DB(ctx).Table("location_new").
+		Where("id=?", location.ID).
+		Updates(map[string]interface{}{"current_max_new": gorm.Expr("current_max_new + ?", amount)})
+	if 0 == res.RowsAffected || res.Error != nil {
+		return 0, res.Error
+	}
+
+	return 0, nil
+}
+
 // WithdrawNewRewardSecondRecommend .
 func (ub *UserBalanceRepo) WithdrawNewRewardSecondRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error) {
 	var err error

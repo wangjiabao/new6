@@ -226,6 +226,13 @@ service App {
 		};
 	};
 
+	rpc AdminUpdateLocationNewMax (AdminUpdateLocationNewMaxRequest) returns (AdminUpdateLocationNewMaxReply) {
+		option (google.api.http) = {
+			post: "/api/admin_dhb/admin_update_location_new_max"
+			body: "send_body"
+		};
+	};
+
 	rpc AdminVipUpdate (AdminVipUpdateRequest) returns (AdminVipUpdateReply) {
 		option (google.api.http) = {
 			post: "/api/admin_dhb/vip_update"
@@ -838,6 +845,20 @@ message AdminPasswordUpdateRequest {
 message AdminPasswordUpdateReply {
 
 }
+
+message AdminUpdateLocationNewMaxRequest {
+	message SendBody{
+		int64 user_id = 1;
+		string amount = 2;
+	}
+
+	SendBody send_body = 1;
+}
+
+message AdminUpdateLocationNewMaxReply {
+
+}
+
 
 message AdminVipUpdateRequest {
 	message SendBody{

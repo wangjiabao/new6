@@ -911,6 +911,10 @@ func (a *AppService) AdminDailyBalanceReward(ctx context.Context, req *v1.AdminD
 	return a.uuc.AdminDailyBalanceReward(ctx, req)
 }
 
+func (a *AppService) AdminUpdateLocationNewMax(ctx context.Context, req *v1.AdminUpdateLocationNewMaxRequest) (*v1.AdminUpdateLocationNewMaxReply, error) {
+	return a.uuc.AdminUpdateLocationNewMax(ctx, req)
+}
+
 func (a *AppService) LockSystem(ctx context.Context, req *v1.LockSystemRequest) (*v1.LockSystemReply, error) {
 	return a.ruc.LockSystem(ctx, req)
 }

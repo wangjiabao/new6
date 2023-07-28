@@ -257,6 +257,7 @@ type UserBalanceRepo interface {
 	WithdrawNewRewardTeamRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
 	WithdrawNewRewardSecondRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
 	WithdrawNewRewardLevelRecommend(ctx context.Context, userId int64, amount int64, amountB int64, locationId int64, tmpRecommendUserIdsInt []int64) (int64, error)
+	UpdateLocationNewMax(ctx context.Context, userId int64, amount int64) (int64, error)
 }
 
 type UserRecommendRepo interface {
@@ -2328,6 +2329,24 @@ func (uuc *UserUseCase) AdminDailyLocationReward(ctx context.Context, req *v1.Ad
 	}
 
 	return &v1.AdminDailyLocationRewardReply{}, nil
+}
+
+func (uuc *UserUseCase) AdminUpdateLocationNewMax(ctx context.Context, req *v1.AdminUpdateLocationNewMaxRequest) (*v1.AdminUpdateLocationNewMaxReply, error) {
+	var (
+		err error
+	)
+	res := &v1.AdminUpdateLocationNewMaxReply{}
+	amountFloat, _ := strconv.ParseFloat(req.SendBody.Amount, 10)
+	amountFloat *= 10000000000
+	amount, _ := strconv.ParseInt(strconv.FormatFloat(amountFloat, 'f', -1, 64), 10, 64)
+
+	_, err = uuc.ubRepo.UpdateLocationNewMax(ctx, req.SendBody.UserId, amount)
+
+	if nil != err {
+		return res, err
+	}
+
+	return nil, err
 }
 
 func (uuc *UserUseCase) AdminDailyLocationRewardNew(ctx context.Context, req *v1.AdminDailyLocationRewardNewRequest) (*v1.AdminDailyLocationRewardNewReply, error) {

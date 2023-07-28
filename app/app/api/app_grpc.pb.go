@@ -56,6 +56,7 @@ type AppClient interface {
 	AdminConfig(ctx context.Context, in *AdminConfigRequest, opts ...grpc.CallOption) (*AdminConfigReply, error)
 	AdminConfigUpdate(ctx context.Context, in *AdminConfigUpdateRequest, opts ...grpc.CallOption) (*AdminConfigUpdateReply, error)
 	AdminUserPasswordUpdate(ctx context.Context, in *AdminPasswordUpdateRequest, opts ...grpc.CallOption) (*AdminPasswordUpdateReply, error)
+	AdminUpdateLocationNewMax(ctx context.Context, in *AdminUpdateLocationNewMaxRequest, opts ...grpc.CallOption) (*AdminUpdateLocationNewMaxReply, error)
 	AdminVipUpdate(ctx context.Context, in *AdminVipUpdateRequest, opts ...grpc.CallOption) (*AdminVipUpdateReply, error)
 	AdminUndoUpdate(ctx context.Context, in *AdminUndoUpdateRequest, opts ...grpc.CallOption) (*AdminUndoUpdateReply, error)
 	AdminAreaLevelUpdate(ctx context.Context, in *AdminAreaLevelUpdateRequest, opts ...grpc.CallOption) (*AdminAreaLevelUpdateReply, error)
@@ -391,6 +392,15 @@ func (c *appClient) AdminUserPasswordUpdate(ctx context.Context, in *AdminPasswo
 	return out, nil
 }
 
+func (c *appClient) AdminUpdateLocationNewMax(ctx context.Context, in *AdminUpdateLocationNewMaxRequest, opts ...grpc.CallOption) (*AdminUpdateLocationNewMaxReply, error) {
+	out := new(AdminUpdateLocationNewMaxReply)
+	err := c.cc.Invoke(ctx, "/api.App/AdminUpdateLocationNewMax", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *appClient) AdminVipUpdate(ctx context.Context, in *AdminVipUpdateRequest, opts ...grpc.CallOption) (*AdminVipUpdateReply, error) {
 	out := new(AdminVipUpdateReply)
 	err := c.cc.Invoke(ctx, "/api.App/AdminVipUpdate", in, out, opts...)
@@ -600,6 +610,7 @@ type AppServer interface {
 	AdminConfig(context.Context, *AdminConfigRequest) (*AdminConfigReply, error)
 	AdminConfigUpdate(context.Context, *AdminConfigUpdateRequest) (*AdminConfigUpdateReply, error)
 	AdminUserPasswordUpdate(context.Context, *AdminPasswordUpdateRequest) (*AdminPasswordUpdateReply, error)
+	AdminUpdateLocationNewMax(context.Context, *AdminUpdateLocationNewMaxRequest) (*AdminUpdateLocationNewMaxReply, error)
 	AdminVipUpdate(context.Context, *AdminVipUpdateRequest) (*AdminVipUpdateReply, error)
 	AdminUndoUpdate(context.Context, *AdminUndoUpdateRequest) (*AdminUndoUpdateReply, error)
 	AdminAreaLevelUpdate(context.Context, *AdminAreaLevelUpdateRequest) (*AdminAreaLevelUpdateReply, error)
@@ -727,6 +738,9 @@ func (UnimplementedAppServer) AdminConfigUpdate(context.Context, *AdminConfigUpd
 }
 func (UnimplementedAppServer) AdminUserPasswordUpdate(context.Context, *AdminPasswordUpdateRequest) (*AdminPasswordUpdateReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminUserPasswordUpdate not implemented")
+}
+func (UnimplementedAppServer) AdminUpdateLocationNewMax(context.Context, *AdminUpdateLocationNewMaxRequest) (*AdminUpdateLocationNewMaxReply, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AdminUpdateLocationNewMax not implemented")
 }
 func (UnimplementedAppServer) AdminVipUpdate(context.Context, *AdminVipUpdateRequest) (*AdminVipUpdateReply, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AdminVipUpdate not implemented")
@@ -1410,6 +1424,24 @@ func _App_AdminUserPasswordUpdate_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _App_AdminUpdateLocationNewMax_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AdminUpdateLocationNewMaxRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AppServer).AdminUpdateLocationNewMax(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/api.App/AdminUpdateLocationNewMax",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AppServer).AdminUpdateLocationNewMax(ctx, req.(*AdminUpdateLocationNewMaxRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _App_AdminVipUpdate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AdminVipUpdateRequest)
 	if err := dec(in); err != nil {
@@ -1894,6 +1926,10 @@ var App_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AdminUserPasswordUpdate",
 			Handler:    _App_AdminUserPasswordUpdate_Handler,
+		},
+		{
+			MethodName: "AdminUpdateLocationNewMax",
+			Handler:    _App_AdminUpdateLocationNewMax_Handler,
 		},
 		{
 			MethodName: "AdminVipUpdate",

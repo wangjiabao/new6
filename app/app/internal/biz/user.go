@@ -3020,15 +3020,15 @@ func (uuc *UserUseCase) VipCheck(ctx context.Context, req *v1.VipCheckRequest) (
 
 		teamCsdBalance = user.TeamCsdBalance / 10000000000
 		myUserBalance = userBalance.BalanceUsdt / 10000000000
-		if teamCsdBalance >= vip5BalanceTeam && 2 <= vip4Count && 5 <= user.HistoryRecommend && myUserBalance >= vip5Balance {
+		if teamCsdBalance >= vip5BalanceTeam && 2 <= vip4Count && 1 <= user.HistoryRecommend && myUserBalance >= vip5Balance {
 			myVip = 6
-		} else if teamCsdBalance >= vip4BalanceTeam && 2 <= vip3Count && 5 <= user.HistoryRecommend && myUserBalance >= vip4Balance {
+		} else if teamCsdBalance >= vip4BalanceTeam && 2 <= vip3Count && 1 <= user.HistoryRecommend && myUserBalance >= vip4Balance {
 			myVip = 5
-		} else if teamCsdBalance >= vip3BalanceTeam && 2 <= vip2Count && 5 <= user.HistoryRecommend && myUserBalance >= vip3Balance {
+		} else if teamCsdBalance >= vip3BalanceTeam && 2 <= vip2Count && 1 <= user.HistoryRecommend && myUserBalance >= vip3Balance {
 			myVip = 4
-		} else if teamCsdBalance >= vip2BalanceTeam && 2 <= vip1Count && 5 <= user.HistoryRecommend && myUserBalance >= vip2Balance {
+		} else if teamCsdBalance >= vip2BalanceTeam && 2 <= vip1Count && 1 <= user.HistoryRecommend && myUserBalance >= vip2Balance {
 			myVip = 3
-		} else if teamCsdBalance >= vip1BalanceTeam && 5 <= user.HistoryRecommend && myUserBalance >= vip1Balance {
+		} else if teamCsdBalance >= vip1BalanceTeam && 1 <= user.HistoryRecommend && myUserBalance >= vip1Balance {
 			myVip = 2
 		} else if myUserBalance >= vip0Balance {
 			myVip = 1

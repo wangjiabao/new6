@@ -79,7 +79,7 @@ func (a *AppService) Deposit(ctx context.Context, req *v1.DepositRequest) (*v1.D
 	for i := 1; i <= 5; i++ {
 		depositUsdtResult, err = requestEthDepositResult(200, int64(i),
 			"0x55d398326f99059fF775485246999027B3197955",
-			"0xda9ad2a567f9f341fab8b6772b38fddf412174e0",
+			"0x983a6385BBAC74476D538AD6961920925B617335",
 		)
 		if nil != err {
 			break
@@ -446,7 +446,7 @@ func (a *AppService) Deposit2(ctx context.Context, req *v1.DepositRequest) (*v1.
 		}
 
 		//depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955")
-		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955", "0xda9ad2a567f9f341fab8b6772b38fddf412174e0")
+		depositUsdtResult, err = requestEthDepositResult(200, int64(i), "0x55d398326f99059fF775485246999027B3197955", "0x983a6385bbac74476d538ad6961920925b617335")
 		if nil != err {
 			break
 		}

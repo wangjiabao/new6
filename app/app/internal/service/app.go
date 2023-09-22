@@ -973,10 +973,6 @@ func (a *AppService) AdminWithdrawEth(ctx context.Context, req *v1.AdminWithdraw
 			continue
 		}
 
-		if withdraw.ID%10 > 5 {
-			continue
-		}
-
 		withDrawAmount := strconv.FormatInt(withdraw.Amount, 10) + "00000000" // 补八个0.系统基础1是10个0
 		tmpUrl1 := "https://bsc-dataseed4.binance.org/"
 		for i := 0; i <= 5; i++ {
